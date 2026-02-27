@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HasnaNYogiSystem - POS</title>
+    <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+</head>
+<body>
+
+<h2>HasnaNYogiSystem POS</h2>
+
+<button onclick="startScanner()">Scan Barcode</button>
+<div id="scanner" style="width:300px;"></div>
+
+<h3>Input Manual</h3>
+<input type="text" id="manualName" placeholder="Nama Barang">
+<input type="number" id="manualPrice" placeholder="Harga Jual">
+<input type="number" id="manualQty" placeholder="Qty">
+<button onclick="addManual()">Tambah</button>
+
+<h3>Keranjang</h3>
+<ul id="cart"></ul>
+
+<h3>Total: <span id="total">0</span></h3>
+
+<script src="script.js"></script>
+</body>
+</html>
