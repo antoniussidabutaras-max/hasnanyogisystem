@@ -1,45 +1,143 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HasnaNYogiSystem - Login</title>
+<meta charset="UTF-8">
+<title>HasnaNYogiSystem</title>
+<style>
+body { font-family: Arial; margin:20px; }
+button { margin:5px; padding:5px 10px; }
+input { margin:5px; }
+.section { display:none; margin-top:20px; }
+</style>
 </head>
 <body>
 
-<h2>Login</h2>
-<input type="text" id="loginUser" placeholder="Username">
-<input type="password" id="loginPass" placeholder="Password">
-<button onclick="login()">Login</button>
+<h2>HasnaNYogiSystem</h2>
 
-<h2>Register</h2>
-<input type="text" id="regUser" placeholder="Username">
-<input type="password" id="regPass" placeholder="Password">
-<button onclick="register()">Register</button>
+<button onclick="showSection('inventory')">Inventory</button>
+<button onclick="showSection('transaksi')">Transaksi</button>
+<button onclick="showSection('laporan')">Laporan</button>
+
+<!-- INVENTORY -->
+<div id="inventory" class="section">
+<h3>Tambah Barang</h3>
+<input id="barcode" placeholder="Barcode">
+<input id="nama" placeholder="Nama Barang">
+<input id="modal" type="number" placeholder="Harga Modal">
+<input id="jual" type="number" placeholder="Harga Jual">
+<input id="stok" type="number" placeholder="Stok Awal">
+<button onclick="tambahBarang()">Simpan</button>
+
+<h3>Daftar Barang</h3>
+<ul id="listBarang"></ul>
+</div>
+
+<!-- TRANSAKSI -->
+<div id="transaksi" class="section">
+<h3>Transaksi</h3>
+<input id="scanBarcode" placeholder="Scan / Input Barcode">
+<input id="qty" type="number" placeholder="Qty">
+<button onclick="tambahKeKeranjang()">Tambah</button>
+
+<ul id="keranjang"></ul>
+<h3>Total: <span id="total">0</span></h3>
+<button onclick="selesaiTransaksi()">Selesai Transaksi</button>
+</div>
+
+<!-- LAPORAN -->
+<div id="laporan" class="section">
+<h3>Laporan Hari Ini</h3>
+<div id="hasilLaporan"></div>
+</div>
 
 <script>
-function register(){
-    const user = document.getElementById("regUser").value;
-    const pass = document.getElementById("regPass").value;
+let inventory = JSON.parse(localStorage.getItem("inventory")) || [];
+let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+let keranjang = [];
+let total = 0;
+let totalProfit = 0;
 
-    if(!user || !pass){
-        alert("Isi semua data!");
-        return;
-    }
-
-    localStorage.setItem(user, pass);
-    alert("Registrasi berhasil!");
+function showSection(id){
+document.querySelectorAll('.section').forEach(s=>s.style.display='none');
+document.getElementById(id).style.display='block';
+if(id==="inventory") tampilBarang();
+if(id==="laporan") tampilLaporan();
 }
 
-function login(){
-    const user = document.getElementById("loginUser").value;
-    const pass = document.getElementById("loginPass").value;
+function tambahBarang(){
+let barang = {
+barcode: barcode.value,
+nama: nama.value,
+modal: Number(modal.value),
+jual: Number(jual.value),
+stok: Number(stok.value)
+};
+inventory.push(barang);
+localStorage.setItem("inventory", JSON.stringify(inventory));
+tampilBarang();
+alert("Barang disimpan");
+}
 
-    const storedPass = localStorage.getItem(user);
+function tampilBarang(){
+listBarang.innerHTML="";
+inventory.forEach(b=>{
+listBarang.innerHTML += `<li>${b.nama} | Stok: ${b.stok}</li>`;
+});
+}
 
-    if(storedPass === pass){
-        window.location.href = "dashboard.html";
-    } else {
-        alert("Login salah!");
-    }
+function tambahKeKeranjang(){
+let kode = scanBarcode.value;
+let qtyVal = Number(qty.value);
+let barang = inventory.find(b=>b.barcode===kode);
+
+if(!barang){ alert("Barang tidak ditemukan"); return; }
+if(barang.stok < qtyVal){ alert("Stok tidak cukup"); return; }
+
+let subtotal = barang.jual * qtyVal;
+let profit = (barang.jual - barang.modal) * qtyVal;
+
+keranjang.push({nama:barang.nama, qty:qtyVal, subtotal, profit});
+barang.stok -= qtyVal;
+
+total += subtotal;
+totalProfit += profit;
+
+keranjangTampil();
+localStorage.setItem("inventory", JSON.stringify(inventory));
+}
+
+function keranjangTampil(){
+keranjang.innerHTML="";
+keranjang.forEach(k=>{
+keranjang.innerHTML += `<li>${k.nama} x${k.qty} = ${k.subtotal}</li>`;
+});
+document.getElementById("total").innerText = total;
+}
+
+function selesaiTransaksi(){
+let today = new Date().toLocaleDateString();
+transaksi.push({tanggal:today, total, profit:totalProfit});
+localStorage.setItem("transaksi", JSON.stringify(transaksi));
+
+keranjang=[];
+total=0;
+totalProfit=0;
+keranjangTampil();
+alert("Transaksi selesai");
+}
+
+function tampilLaporan(){
+let today = new Date().toLocaleDateString();
+let hariIni = transaksi.filter(t=>t.tanggal===today);
+
+let totalHarian = hariIni.reduce((a,b)=>a+b.total,0);
+let profitHarian = hariIni.reduce((a,b)=>a+b.profit,0);
+
+hasilLaporan.innerHTML = `
+Tanggal: ${today}<br>
+Total Penjualan: ${totalHarian}<br>
+Total Keuntungan: ${profitHarian}
+`;
 }
 </script>
 
