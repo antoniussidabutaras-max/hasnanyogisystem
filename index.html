@@ -18,18 +18,36 @@ input { margin:5px; }
 <button onclick="showSection('transaksi')">Transaksi</button>
 <button onclick="showSection('laporan')">Laporan</button>
 
-<!-- INVENTORY -->
+<!-- INVENTORY MODERN -->
 <div id="inventory" class="section">
-<h3>Tambah Barang</h3>
+
+<h3>Tambah / Edit Barang</h3>
 <input id="barcode" placeholder="Barcode">
 <input id="nama" placeholder="Nama Barang">
 <input id="modal" type="number" placeholder="Harga Modal">
 <input id="jual" type="number" placeholder="Harga Jual">
-<input id="stok" type="number" placeholder="Stok Awal">
-<button onclick="tambahBarang()">Simpan</button>
+<input id="stok" type="number" placeholder="Stok">
+<button onclick="simpanBarang()">Simpan / Update</button>
+
+<hr>
+
+<input id="search" placeholder="Cari Barang..." onkeyup="tampilBarang()">
 
 <h3>Daftar Barang</h3>
-<ul id="listBarang"></ul>
+<table border="1" cellpadding="5">
+<thead>
+<tr>
+<th>Barcode</th>
+<th>Nama</th>
+<th>Modal</th>
+<th>Jual</th>
+<th>Stok</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="listBarang"></tbody>
+</table>
+
 </div>
 
 <!-- TRANSAKSI -->
@@ -143,3 +161,4 @@ Total Keuntungan: ${profitHarian}
 
 </body>
 </html>
+
