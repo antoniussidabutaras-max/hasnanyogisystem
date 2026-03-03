@@ -82,25 +82,89 @@ if(id==="inventory") tampilBarang();
 if(id==="laporan") tampilLaporan();
 }
 
-function tambahBarang(){
-let barang = {
-barcode: barcode.value,
+<script>
+
+function simpanBarang(){
+let kode = barcode.value;
+let existing = inventory.find(b=>b.barcode===kode);
+
+if(existing){
+existing.nama = nama.value;
+existing.modal = Number(modal.value);
+existing.jual = Number(jual.value);
+existing.stok = Number(stok.value);
+alert("Barang berhasil diupdate");
+}else{
+inventory.push({
+barcode: kode,
 nama: nama.value,
 modal: Number(modal.value),
 jual: Number(jual.value),
 stok: Number(stok.value)
-};
-inventory.push(barang);
+});
+alert("Barang berhasil ditambahkan");
+}
+
 localStorage.setItem("inventory", JSON.stringify(inventory));
 tampilBarang();
-alert("Barang disimpan");
+clearForm();
 }
 
 function tampilBarang(){
+let keyword = search.value.toLowerCase();
 listBarang.innerHTML="";
-inventory.forEach(b=>{
-listBarang.innerHTML += `<li>${b.nama} | Stok: ${b.stok}</li>`;
+
+inventory
+.filter(b=>b.nama.toLowerCase().includes(keyword))
+.forEach(b=>{
+listBarang.innerHTML += `
+<tr>
+<td>${b.barcode}</td>
+<td>${b.nama}</td>
+<td>${b.modal}</td>
+<td>${b.jual}</td>
+<td>${b.stok}</td>
+<td>
+<button onclick="editBarang('${b.barcode}')">Edit</button>
+<button onclick="hapusBarang('${b.barcode}')">Hapus</button>
+<button onclick="restock('${b.barcode}',10)">+10</button>
+<button onclick="restock('${b.barcode}',20)">+20</button>
+</td>
+</tr>
+`;
 });
+}
+
+function editBarang(kode){
+let b = inventory.find(b=>b.barcode===kode);
+barcode.value = b.barcode;
+nama.value = b.nama;
+modal.value = b.modal;
+jual.value = b.jual;
+stok.value = b.stok;
+}
+
+function hapusBarang(kode){
+if(confirm("Yakin hapus barang?")){
+inventory = inventory.filter(b=>b.barcode!==kode);
+localStorage.setItem("inventory", JSON.stringify(inventory));
+tampilBarang();
+}
+}
+
+function restock(kode,jumlah){
+let b = inventory.find(b=>b.barcode===kode);
+b.stok += jumlah;
+localStorage.setItem("inventory", JSON.stringify(inventory));
+tampilBarang();
+}
+
+function clearForm(){
+barcode.value="";
+nama.value="";
+modal.value="";
+jual.value="";
+stok.value="";
 }
 
 function tambahKeKeranjang(){
@@ -161,4 +225,5 @@ Total Keuntungan: ${profitHarian}
 
 </body>
 </html>
+
 
