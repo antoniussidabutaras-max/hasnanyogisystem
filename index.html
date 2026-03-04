@@ -171,27 +171,41 @@ tampilBarang();
 
 // SCANNER
 function startScan(){
+
 const html5QrCode = new Html5Qrcode("reader");
 
 Html5Qrcode.getCameras().then(devices => {
+
 if(devices && devices.length){
+
+// Cari kamera belakang
+let backCamera = devices.find(device =>
+device.label.toLowerCase().includes('back') ||
+device.label.toLowerCase().includes('rear')
+);
+
+// Kalau tidak ketemu, pakai kamera terakhir (biasanya belakang di HP)
+let cameraId = backCamera ? backCamera.id : devices[devices.length - 1].id;
+
 html5QrCode.start(
-devices[0].id,
-{fps:10, qrbox:250},
+cameraId,
+{ fps: 10, qrbox: 250 },
 (decodedText)=>{
 document.getElementById("barcode").value = decodedText;
 html5QrCode.stop();
 document.getElementById("reader").innerHTML="";
 }
 );
+
 }else{
 alert("Kamera tidak ditemukan");
 }
+
 }).catch(err=>{
 alert("Izin kamera ditolak atau tidak tersedia");
 });
-}
 
+}
 // TRANSAKSI
 let transaksi=JSON.parse(localStorage.getItem("transaksi"))||[];
 let keranjang=[];
@@ -265,3 +279,4 @@ tampilBarang();
 
 </body>
 </html>
+
