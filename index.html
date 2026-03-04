@@ -38,6 +38,10 @@ table,th,td{border:1px solid #ccc;padding:8px;text-align:center}
 <input id="jual" type="number" placeholder="Harga Jual">
 <input id="stok" type="number" placeholder="Stok">
 <button onclick="simpanBarang()">Simpan</button>
+<br><br>
+<button onclick="backupData()">Backup Data</button>
+<button onclick="restoreData()">Restore Data</button>
+<input type="file" id="fileInput" style="display:none" onchange="loadFile(event)">
 
 <input id="search" placeholder="Cari Barang" onkeyup="tampilBarang()">
 
@@ -272,11 +276,54 @@ Total Keuntungan: Rp ${profitHarian.toLocaleString('id-ID')}
 }
 
 tampilBarang();
+
+// ================= BACKUP & RESTORE =================
+
+function backupData(){
+let data = {
+inventory: inventory,
+transaksi: transaksi
+};
+
+let blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+let url = URL.createObjectURL(blob);
+
+let a = document.createElement("a");
+a.href = url;
+a.download = "backup-hasnanyogi.json";
+a.click();
+}
+
+function restoreData(){
+document.getElementById("fileInput").click();
+}
+
+function loadFile(event){
+let file = event.target.files[0];
+let reader = new FileReader();
+
+reader.onload = function(e){
+let data = JSON.parse(e.target.result);
+
+inventory = data.inventory || [];
+transaksi = data.transaksi || [];
+
+localStorage.setItem("inventory", JSON.stringify(inventory));
+localStorage.setItem("transaksi", JSON.stringify(transaksi));
+
+alert("Data berhasil di-restore");
+tampilBarang();
+};
+
+reader.readAsText(file);
+}
+  
 </script>
 
 <script src="https://unpkg.com/@zxing/library@latest"></script>
 </body>
 </html>
+
 
 
 
