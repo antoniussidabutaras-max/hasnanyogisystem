@@ -56,28 +56,6 @@ table,th,td{border:1px solid #ccc;padding:8px;text-align:center}
 </div>
 </div>
 
-function startScan(){
-const html5QrCode = new Html5Qrcode("reader");
-
-Html5Qrcode.getCameras().then(devices => {
-if (devices && devices.length) {
-html5QrCode.start(
-devices[0].id,
-{
-fps: 10,
-qrbox: 250
-},
-(decodedText) => {
-barcode.value = decodedText;
-html5QrCode.stop();
-document.getElementById("reader").innerHTML = "";
-},
-(errorMessage) => {}
-);
-}
-});
-}
-
 <!-- TRANSAKSI -->
 <div id="transaksi" class="section">
 <div class="card">
@@ -253,10 +231,41 @@ Total Keuntungan: Rp ${formatRupiah(profitHarian)}
 }
 
 tampilBarang();
-</script>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+function startScan(){
+    const html5QrCode = new Html5Qrcode("reader");
+
+    Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+
+            html5QrCode.start(
+                devices[0].id,
+                {
+                    fps: 10,
+                    qrbox: 250
+                },
+                (decodedText) => {
+                    document.getElementById("barcode").value = decodedText;
+                    html5QrCode.stop();
+                    document.getElementById("reader").innerHTML = "";
+                },
+                (errorMessage) => {}
+            );
+
+        } else {
+            alert("Kamera tidak ditemukan");
+        }
+    }).catch(err => {
+        alert("Izin kamera ditolak atau tidak tersedia");
+    });
+}
+</script>
+
 </body>
 
 </html>
+
 
