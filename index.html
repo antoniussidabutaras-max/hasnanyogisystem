@@ -194,6 +194,37 @@ let selectedDeviceId = backCamera
 codeReader.decodeFromVideoDevice(selectedDeviceId, 'reader', (result, err) => {
 
 if (result) {
+
+let kode = result.text;
+let barang = inventory.find(b => b.barcode === kode);
+
+if(barang && barang.stok > 0){
+
+let subtotal = barang.jual;
+let profit = barang.jual - barang.modal;
+
+keranjang.push({
+nama: barang.nama,
+qty: 1,
+subtotal,
+profit
+});
+
+barang.stok -= 1;
+total += subtotal;
+totalProfit += profit;
+
+localStorage.setItem("inventory", JSON.stringify(inventory));
+
+keranjangTampil();
+tampilBarang();
+
+}
+
+}
+
+});
+if (result) {
 document.getElementById("barcode").value = result.text;
 codeReader.reset();
 document.getElementById("reader").innerHTML="";
@@ -261,6 +292,31 @@ keranjangTampil();
 alert("Transaksi selesai");
 }
 
+<button onclick="cetakStruk()">Cetak Struk</button>
+function cetakStruk(){
+
+let isi = `
+<h3>HasnaNYogi Store</h3>
+<hr>
+`;
+
+keranjang.forEach(k=>{
+isi += `${k.nama} x${k.qty} - Rp ${k.subtotal}<br>`;
+});
+
+isi += `
+<hr>
+Total: Rp ${total}
+<br><br>
+Terima kasih
+`;
+
+let win = window.open("", "", "width=300,height=600");
+win.document.write(isi);
+win.print();
+win.close();
+}
+
 // LAPORAN
 function tampilLaporan(){
 let today=new Date().toLocaleDateString();
@@ -273,6 +329,33 @@ Tanggal: ${today}<br>
 Total Penjualan: Rp ${totalHarian.toLocaleString('id-ID')}<br>
 Total Keuntungan: Rp ${profitHarian.toLocaleString('id-ID')}
 `;
+}
+
+<canvas id="chartBulanan"></canvas>
+function grafikBulanan(){
+
+let dataPerHari = {};
+
+transaksi.forEach(t=>{
+if(!dataPerHari[t.tanggal]){
+dataPerHari[t.tanggal] = 0;
+}
+dataPerHari[t.tanggal] += t.total;
+});
+
+let labels = Object.keys(dataPerHari);
+let values = Object.values(dataPerHari);
+
+new Chart(document.getElementById("chartBulanan"), {
+type: 'bar',
+data: {
+labels: labels,
+datasets: [{
+label: 'Penjualan',
+data: values
+}]
+}
+});
 }
 
 tampilBarang();
@@ -317,12 +400,38 @@ tampilBarang();
 
 reader.readAsText(file);
 }
-  
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://xymumtqnxlccbnqzdvod.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5bXVtdHFueGxjY2JucXpkdm9kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MTE3NzEsImV4cCI6MjA4ODE4Nzc3MX0.HR9BA94fsAQph0iGuthS6tnNWhWjGlpDpUqPRQTdjAw";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+async function testKoneksi(){
+const { data, error } = await supabaseClient
+.from('inventory')
+.select('*');
+
+if(error){
+console.log("Error:", error);
+alert("Koneksi gagal");
+}else{
+console.log("Data:", data);
+alert("Koneksi Supabase berhasil!");
+}
+}
 </script>
 
 <script src="https://unpkg.com/@zxing/library@latest"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
+
 
 
 
