@@ -30,6 +30,9 @@ table,th,td{border:1px solid #ccc;padding:8px;text-align:center}
 <div class="card">
 <h2>Inventory</h2>
 <input id="barcode" placeholder="Barcode">
+<button onclick="startScan()">Scan Kamera</button>
+
+<div id="reader" style="width:300px;"></div>
 <input id="nama" placeholder="Nama Barang">
 <input id="modal" type="number" placeholder="Harga Modal">
 <input id="jual" type="number" placeholder="Harga Jual">
@@ -52,6 +55,28 @@ table,th,td{border:1px solid #ccc;padding:8px;text-align:center}
 </table>
 </div>
 </div>
+
+function startScan(){
+const html5QrCode = new Html5Qrcode("reader");
+
+Html5Qrcode.getCameras().then(devices => {
+if (devices && devices.length) {
+html5QrCode.start(
+devices[0].id,
+{
+fps: 10,
+qrbox: 250
+},
+(decodedText) => {
+barcode.value = decodedText;
+html5QrCode.stop();
+document.getElementById("reader").innerHTML = "";
+},
+(errorMessage) => {}
+);
+}
+});
+}
 
 <!-- TRANSAKSI -->
 <div id="transaksi" class="section">
@@ -101,26 +126,38 @@ if(id==="laporan") tampilLaporan();
 let inventory = JSON.parse(localStorage.getItem("inventory")) || [];
 
 function simpanBarang(){
-let kode=barcode.value;
-let namaBarang=nama.value;
-let modalVal=Number(modal.value);
-let jualVal=Number(jual.value);
-let stokVal=Number(stok.value);
+let kode = barcode.value.trim();
+let namaBarang = nama.value.trim();
+let modalVal = Number(modal.value);
+let jualVal = Number(jual.value);
+let stokVal = Number(stok.value);
 
-let existing=inventory.find(b=>b.barcode===kode);
+// Kalau barcode kosong → buat ID otomatis
+if(kode === ""){
+    kode = "AUTO-" + Date.now();
+}
+
+let existing = inventory.find(b => b.barcode === kode);
+
 if(existing){
-existing.nama=namaBarang;
-existing.modal=modalVal;
-existing.jual=jualVal;
-existing.stok=stokVal;
+    existing.nama = namaBarang;
+    existing.modal = modalVal;
+    existing.jual = jualVal;
+    existing.stok = stokVal;
 }else{
-inventory.push({barcode:kode,nama:namaBarang,modal:modalVal,jual:jualVal,stok:stokVal});
-}
-localStorage.setItem("inventory",JSON.stringify(inventory));
-tampilBarang();
-barcode.value=nama.value=modal.value=jual.value=stok.value="";
+    inventory.push({
+        barcode: kode,
+        nama: namaBarang,
+        modal: modalVal,
+        jual: jualVal,
+        stok: stokVal
+    });
 }
 
+localStorage.setItem("inventory", JSON.stringify(inventory));
+tampilBarang();
+barcode.value = nama.value = modal.value = jual.value = stok.value = "";
+}
 function tampilBarang(){
 let keyword=search.value.toLowerCase();
 listBarang.innerHTML="";
@@ -218,6 +255,8 @@ Total Keuntungan: Rp ${formatRupiah(profitHarian)}
 tampilBarang();
 </script>
 
+<script src="https://unpkg.com/html5-qrcode"></script>
 </body>
 
 </html>
+
