@@ -31,7 +31,7 @@ table,th,td{border:1px solid #ccc;padding:8px;text-align:center}
 
 <input id="barcode" placeholder="Barcode">
 <button onclick="startScan()">Scan Kamera</button>
-<div id="reader" style="width:300px;margin-top:10px;"></div>
+<div id="reader" style="width:100%; max-width:400px;"></div>
 
 <input id="nama" placeholder="Nama Barang">
 <input id="modal" type="number" placeholder="Harga Modal">
@@ -170,49 +170,36 @@ tampilBarang();
 }
 
 // SCANNER
+let codeReader;
+
 function startScan(){
 
-const html5QrCode = new Html5Qrcode("reader");
+codeReader = new ZXing.BrowserMultiFormatReader();
 
-Html5Qrcode.getCameras().then(devices => {
+codeReader.listVideoInputDevices()
+.then(videoInputDevices => {
 
-if(devices && devices.length){
-
-let backCamera = devices.find(device =>
-device.label.toLowerCase().includes('back') ||
-device.label.toLowerCase().includes('rear')
+let backCamera = videoInputDevices.find(device =>
+device.label.toLowerCase().includes('back')
 );
 
-let cameraId = backCamera ? backCamera.id : devices[devices.length - 1].id;
+let selectedDeviceId = backCamera 
+? backCamera.deviceId 
+: videoInputDevices[videoInputDevices.length - 1].deviceId;
 
-html5QrCode.start(
-cameraId,
-{
-fps: 10,
-qrbox: { width: 300, height: 150 }, // lebih lebar untuk barcode 1D
-aspectRatio: 1.77,
-formatsToSupport: [
-Html5QrcodeSupportedFormats.EAN_13,
-Html5QrcodeSupportedFormats.EAN_8,
-Html5QrcodeSupportedFormats.UPC_A,
-Html5QrcodeSupportedFormats.UPC_E,
-Html5QrcodeSupportedFormats.CODE_128,
-Html5QrcodeSupportedFormats.CODE_39
-]
-},
-(decodedText)=>{
-document.getElementById("barcode").value = decodedText;
-html5QrCode.stop();
+codeReader.decodeFromVideoDevice(selectedDeviceId, 'reader', (result, err) => {
+
+if (result) {
+document.getElementById("barcode").value = result.text;
+codeReader.reset();
 document.getElementById("reader").innerHTML="";
 }
-);
 
-}else{
-alert("Kamera tidak ditemukan");
-}
+});
 
-}).catch(err=>{
-alert("Izin kamera ditolak atau tidak tersedia");
+})
+.catch(err => {
+alert("Kamera tidak tersedia atau izin ditolak");
 });
 
 }
@@ -287,7 +274,9 @@ Total Keuntungan: Rp ${profitHarian.toLocaleString('id-ID')}
 tampilBarang();
 </script>
 
+<script src="https://unpkg.com/@zxing/library@latest"></script>
 </body>
 </html>
+
 
 
