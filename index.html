@@ -63,10 +63,23 @@ table,th,td{border:1px solid #ccc;padding:8px;text-align:center}
 
 <ul id="keranjang"></ul>
 <h3>Total: Rp <span id="total">0</span></h3>
+
+<input id="bayar" type="number" placeholder="Uang Bayar">
+<h3>Kembalian: Rp <span id="kembalian">0</span></h3>
 <button onclick="selesaiTransaksi()">Selesai</button>
 </div>
 </div>
 
+function formatRupiah(angka){
+return angka.toLocaleString('id-ID');
+}
+
+document.getElementById("bayar").addEventListener("input", function(){
+let bayarVal = Number(this.value);
+let kembali = bayarVal - total;
+document.getElementById("kembalian").innerText = kembali > 0 ? formatRupiah(kembali) : 0;
+});
+  
 <!-- LAPORAN -->
 <div id="laporan" class="section">
 <div class="card">
@@ -174,7 +187,7 @@ keranjang.innerHTML="";
 keranjang.forEach(k=>{
 keranjang.innerHTML+=`<li>${k.nama} x${k.qty} = Rp ${k.subtotal}</li>`;
 });
-document.getElementById("total").innerText=total;
+document.getElementById("total").innerText=formatRupiah(total);
 }
 
 function selesaiTransaksi(){
@@ -197,8 +210,8 @@ let profitHarian=hariIni.reduce((a,b)=>a+b.profit,0);
 
 hasilLaporan.innerHTML=`
 Tanggal: ${today}<br>
-Total Penjualan: Rp ${totalHarian}<br>
-Total Keuntungan: Rp ${profitHarian}
+Total Penjualan: Rp ${formatRupiah(totalHarian)}<br>
+Total Keuntungan: Rp ${formatRupiah(profitHarian)}
 `;
 }
 
@@ -206,4 +219,5 @@ tampilBarang();
 </script>
 
 </body>
+
 </html>
