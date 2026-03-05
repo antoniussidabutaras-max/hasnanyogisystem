@@ -2,60 +2,67 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>TOKO SEMBAKO HASNA DAN YOGI</title>
-
-<script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>TOKO Sembako Hasna dan Yogi</title>
 
 <style>
 
 body{
 font-family:Arial;
-margin:0;
 background:#f4f6f9;
+margin:0;
 }
 
-nav{
+header{
 background:#2c3e50;
+color:white;
 padding:15px;
+font-size:20px;
 }
 
-nav button{
-margin-right:10px;
-padding:10px 15px;
-border:none;
-background:#3498db;
+.container{
+display:flex;
+}
+
+.sidebar{
+width:200px;
+background:#34495e;
+min-height:100vh;
 color:white;
-border-radius:5px;
+}
+
+.sidebar button{
+width:100%;
+padding:12px;
+border:none;
+background:none;
+color:white;
+text-align:left;
 cursor:pointer;
 }
 
-nav button:hover{
-background:#2980b9;
+.sidebar button:hover{
+background:#2c3e50;
 }
 
-.section{
-display:none;
+.content{
+flex:1;
 padding:20px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
 table{
 width:100%;
 border-collapse:collapse;
-margin-top:10px;
+background:white;
 }
 
-table,th,td{
+th,td{
 border:1px solid #ccc;
 padding:8px;
 text-align:center;
+}
+
+th{
+background:#eee;
 }
 
 input,select{
@@ -63,556 +70,457 @@ padding:6px;
 margin:4px;
 }
 
-button.action{
-padding:6px 10px;
-margin:3px;
+.btn{
+padding:8px 12px;
+cursor:pointer;
 }
 
-#dashboard{
-display:block;
-}
+.green{background:#27ae60;color:white}
+.red{background:#c0392b;color:white}
+.blue{background:#2980b9;color:white}
 
 </style>
 </head>
 
 <body>
 
-<nav>
-<button onclick="showSection('dashboard')">Dashboard</button>
-<button onclick="showSection('inventory')">Inventory</button>
-<button onclick="showSection('stock')">Stock Masuk</button>
-<button onclick="showSection('kasir')">Kasir</button>
-<button onclick="showSection('hutang')">Hutang</button>
-<button onclick="showSection('laporan')">Laporan</button>
-</nav>
+<header>
+TOKO Sembako Hasna dan Yogi
+</header>
 
-<!-- DASHBOARD -->
+<div class="container">
 
-<div id="dashboard" class="section">
-<div class="card">
-<h2>TOKO SEMBAKO HASNA DAN YOGI</h2>
+<div class="sidebar">
 
-<h3>Alert Stok Minimum</h3>
-<div id="stokAlert"></div>
+<button onclick="menu('dashboard')">Dashboard</button>
+<button onclick="menu('kasir')">Kasir</button>
+<button onclick="menu('produk')">Produk</button>
+<button onclick="menu('stok')">Stok Masuk</button>
+<button onclick="menu('hutang')">Hutang</button>
+<button onclick="menu('laporan')">Laporan</button>
 
 </div>
-</div>
 
-
-<!-- INVENTORY -->
-
-<div id="inventory" class="section">
-<div class="card">
-
-<h2>Inventory</h2>
-
-<input id="barcode" placeholder="Barcode">
-<button onclick="scanInventory()">Scan Kamera</button>
-
-<div id="readerInventory" style="width:300px"></div>
-
-<input id="namaBarang" placeholder="Nama Barang">
-
-<select id="satuan">
-<option>pcs</option>
-<option>kg</option>
-<option>ons</option>
-<option>meter</option>
-</select>
-
-<input id="modal" type="number" placeholder="Harga Modal">
-<input id="jual" type="number" placeholder="Harga Jual">
-<input id="stok" type="number" placeholder="Stok">
-<input id="stokMin" type="number" placeholder="Stok Minimum">
-
-<button onclick="simpanBarang()">Simpan</button>
-
-<button onclick="resetInventory()">Reset</button>
-
-<input id="searchBarang" placeholder="Cari Barang" onkeyup="tampilBarang()">
-
-<table>
-<thead>
-<tr>
-<th>Barcode</th>
-<th>Nama</th>
-<th>Satuan</th>
-<th>Modal</th>
-<th>Jual</th>
-<th>Stok</th>
-<th>Min</th>
-<th>Aksi</th>
-</tr>
-</thead>
-
-<tbody id="listBarang"></tbody>
-
-</table>
+<div class="content" id="content"></div>
 
 </div>
-</div>
-
-
-<!-- STOCK MASUK -->
-
-<div id="stock" class="section">
-<div class="card">
-
-<h2>Stock Masuk</h2>
-
-<input id="barcodeStock" placeholder="Barcode">
-<input id="qtyStock" type="number" placeholder="Qty">
-
-<button onclick="tambahStock()">Tambah Stock</button>
-
-</div>
-</div>
-
-
-<!-- KASIR -->
-
-<div id="kasir" class="section">
-<div class="card">
-
-<h2>Kasir</h2>
-
-<input id="scanKasir" placeholder="Scan Barcode">
-<button onclick="scanKasirCamera()">Scan Kamera</button>
-
-<div id="readerKasir" style="width:300px"></div>
-
-<input id="cariBarangKasir" placeholder="Cari Nama Barang" onkeyup="cariBarangKasir()">
-
-<input id="qtyKasir" type="number" placeholder="Qty">
-
-<button onclick="tambahKeranjang()">Tambah</button>
-
-<h3>Keranjang</h3>
-
-<table>
-<thead>
-<tr>
-<th>Barang</th>
-<th>Qty</th>
-<th>Satuan</th>
-<th>Harga</th>
-<th>Subtotal</th>
-<th>Aksi</th>
-</tr>
-</thead>
-
-<tbody id="keranjang"></tbody>
-
-</table>
-
-<h3>Total : Rp <span id="total">0</span></h3>
-
-<h3>Pembayaran</h3>
-
-<input id="bayar" type="number" placeholder="Uang Bayar" oninput="hitungKembalian()">
-
-<p>Kembalian : Rp <span id="kembali">0</span></p>
-
-<button onclick="selesaiTransaksi()">Selesai</button>
-
-<button onclick="printStruk()">Print Struk</button>
-
-</div>
-</div>
-
-
-<!-- HUTANG -->
-
-<div id="hutang" class="section">
-<div class="card">
-
-<h2>Data Hutang</h2>
-
-<table>
-<thead>
-<tr>
-<th>Tanggal</th>
-<th>Nama</th>
-<th>Jumlah</th>
-<th>Status</th>
-<th>Aksi</th>
-</tr>
-</thead>
-
-<tbody id="listHutang"></tbody>
-
-</table>
-
-<button onclick="resetHutang()">Reset</button>
-
-</div>
-</div>
-
-
-<!-- LAPORAN -->
-
-<div id="laporan" class="section">
-<div class="card">
-
-<h2>Laporan Harian</h2>
-
-<div id="laporanHari"></div>
-
-<button onclick="exportExcel()">Export Excel</button>
-
-<button onclick="resetLaporan()">Reset</button>
-
-</div>
-</div>
-
-
 
 <script>
 
-function showSection(id){
-
-document.querySelectorAll('.section').forEach(s=>s.style.display='none')
-
-document.getElementById(id).style.display='block'
-
-if(id=="dashboard") alertStok()
-
-if(id=="inventory") tampilBarang()
-
-if(id=="hutang") tampilHutang()
-
-if(id=="laporan") tampilLaporan()
-
-}
-
-
-function rupiah(x){
-
-return x.toLocaleString("id-ID")
-
-}
-
-
-let inventory=JSON.parse(localStorage.getItem("inventory"))||[]
-
+let produk=JSON.parse(localStorage.getItem("produk"))||[]
 let transaksi=JSON.parse(localStorage.getItem("transaksi"))||[]
-
 let hutang=JSON.parse(localStorage.getItem("hutang"))||[]
 
+function save(){
 
-function simpanBarang(){
-
-let data={
-barcode:barcode.value,
-nama:namaBarang.value,
-satuan:satuan.value,
-modal:Number(modal.value),
-jual:Number(jual.value),
-stok:Number(stok.value),
-min:Number(stokMin.value)
-}
-
-inventory.push(data)
-
-localStorage.setItem("inventory",JSON.stringify(inventory))
-
-tampilBarang()
+localStorage.setItem("produk",JSON.stringify(produk))
+localStorage.setItem("transaksi",JSON.stringify(transaksi))
+localStorage.setItem("hutang",JSON.stringify(hutang))
 
 }
 
+function rupiah(n){
 
-function tampilBarang(){
+return "Rp "+n.toLocaleString("id-ID")+",-"
 
-listBarang.innerHTML=""
+}
 
-inventory.forEach(b=>{
+function menu(m){
 
-listBarang.innerHTML+=`
+if(m=="dashboard")dashboard()
+if(m=="produk")produkMenu()
+if(m=="kasir")kasirMenu()
+if(m=="stok")stokMenu()
+if(m=="hutang")hutangMenu()
+if(m=="laporan")laporanMenu()
+
+}
+
+function dashboard(){
+
+let totalStok=produk.reduce((a,b)=>a+b.stok,0)
+
+document.getElementById("content").innerHTML=`
+
+<h2>Dashboard</h2>
+
+Total Produk : ${produk.length}<br>
+Total Stok : ${totalStok}
+
+`
+
+}
+
+function produkMenu(){
+
+let html=`
+
+<h2>Produk</h2>
+
+<input id="nama" placeholder="Nama">
+<input id="barcode" placeholder="Barcode">
+<input id="modal" type="number" placeholder="Harga Modal">
+<input id="jual" type="number" placeholder="Harga Jual">
+<input id="satuan" placeholder="Satuan">
+<input id="stok" type="number" placeholder="Stok">
+
+<button class="btn green" onclick="tambahProduk()">Tambah</button>
+<button class="btn red" onclick="resetProduk()">Reset</button>
+
+<br><br>
+
+<table>
 
 <tr>
+<th>Nama</th>
+<th>Barcode</th>
+<th>Stok</th>
+<th>Modal</th>
+<th>Jual</th>
+</tr>
 
-<td>${b.barcode}</td>
+`
 
-<td>${b.nama}</td>
+produk.forEach(p=>{
 
-<td>${b.satuan}</td>
+html+=`
 
-<td>Rp ${rupiah(b.modal)}</td>
-
-<td>Rp ${rupiah(b.jual)}</td>
-
-<td>${b.stok}</td>
-
-<td>${b.min}</td>
-
-<td>
-
-<button onclick="hapusBarang('${b.barcode}')">Hapus</button>
-
-</td>
-
+<tr>
+<td>${p.nama}</td>
+<td>${p.barcode}</td>
+<td>${p.stok}</td>
+<td>${rupiah(p.modal)}</td>
+<td>${rupiah(p.jual)}</td>
 </tr>
 
 `
 
 })
 
-}
+html+="</table>"
 
-
-function hapusBarang(k){
-
-inventory=inventory.filter(i=>i.barcode!=k)
-
-localStorage.setItem("inventory",JSON.stringify(inventory))
-
-tampilBarang()
+document.getElementById("content").innerHTML=html
 
 }
 
+function tambahProduk(){
 
-function resetInventory(){
+let p={
 
-if(confirm("Reset Inventory?")){
+nama:nama.value,
+barcode:barcode.value,
+modal:Number(modal.value),
+jual:Number(jual.value),
+satuan:satuan.value,
+stok:Number(stok.value)
 
-inventory=[]
+}
 
-localStorage.removeItem("inventory")
+produk.push(p)
 
-tampilBarang()
+save()
+produkMenu()
+
+}
+
+function resetProduk(){
+
+if(confirm("hapus semua produk?")){
+
+produk=[]
+save()
+produkMenu()
 
 }
 
 }
 
+let keranjang=[]
 
-let cart=[]
+function kasirMenu(){
+
+let html=`
+
+<h2>Kasir</h2>
+
+<input id="scan" placeholder="scan barcode">
+
+<button class="btn blue" onclick="scanBarang()">Tambah</button>
+
+<br><br>
+
+<table>
+
+<tr>
+<th>Barang</th>
+<th>Harga</th>
+<th>Qty</th>
+<th>Total</th>
+</tr>
+
+`
 
 let total=0
 
+keranjang.forEach(k=>{
 
-function tambahKeranjang(){
+let t=k.qty*k.jual
 
-let kode=scanKasir.value
+total+=t
 
-let qty=Number(qtyKasir.value)
-
-let barang=inventory.find(b=>b.barcode==kode)
-
-if(!barang)return alert("Barang tidak ditemukan")
-
-let subtotal=barang.jual*qty
-
-cart.push({nama:barang.nama,qty,satuan:barang.satuan,harga:barang.jual,subtotal})
-
-barang.stok-=qty
-
-total+=subtotal
-
-localStorage.setItem("inventory",JSON.stringify(inventory))
-
-renderCart()
-
-}
-
-
-function renderCart(){
-
-keranjang.innerHTML=""
-
-cart.forEach((c,i)=>{
-
-keranjang.innerHTML+=`
+html+=`
 
 <tr>
-
-<td>${c.nama}</td>
-
-<td>${c.qty}</td>
-
-<td>${c.satuan}</td>
-
-<td>Rp ${rupiah(c.harga)}</td>
-
-<td>Rp ${rupiah(c.subtotal)}</td>
-
-<td><button onclick="hapusCart(${i})">Hapus</button></td>
-
+<td>${k.nama}</td>
+<td>${rupiah(k.jual)}</td>
+<td>${k.qty}</td>
+<td>${rupiah(t)}</td>
 </tr>
 
 `
 
 })
 
-document.getElementById("total").innerText=rupiah(total)
+html+=`
+
+</table>
+
+<h3>Total : ${rupiah(total)}</h3>
+
+Diskon % <input id="diskon" type="number">
+
+<br><br>
+
+Bayar <input id="bayar" type="number">
+
+<button class="btn green" onclick="bayar()">Bayar</button>
+
+`
+
+document.getElementById("content").innerHTML=html
 
 }
 
+function scanBarang(){
 
-function hapusCart(i){
+let kode=scan.value
 
-total-=cart[i].subtotal
+let p=produk.find(x=>x.barcode==kode)
 
-cart.splice(i,1)
+if(!p)return alert("barang tidak ada")
 
-renderCart()
+let k=keranjang.find(x=>x.barcode==kode)
 
-}
+if(k){
 
+k.qty++
 
-function hitungKembalian(){
+}else{
 
-let bayarVal=Number(bayar.value)
-
-let kembali=bayarVal-total
-
-document.getElementById("kembali").innerText=kembali>0?rupiah(kembali):0
+keranjang.push({...p,qty:1})
 
 }
 
-
-function selesaiTransaksi(){
-
-let bayarVal=Number(bayar.value)
-
-let today=new Date().toLocaleDateString()
-
-if(bayarVal<total){
-
-let nama=prompt("Nama pembeli (hutang):")
-
-hutang.push({tanggal:today,nama,jumlah:total-bayarVal,status:"Belum Lunas"})
-
-localStorage.setItem("hutang",JSON.stringify(hutang))
+kasirMenu()
 
 }
 
-transaksi.push({tanggal:today,total})
+function bayar(){
 
-localStorage.setItem("transaksi",JSON.stringify(transaksi))
+let total=keranjang.reduce((a,b)=>a+(b.qty*b.jual),0)
 
-cart=[]
+let d=Number(diskon.value)||0
 
-total=0
+total=total-(total*d/100)
 
-renderCart()
+let uang=Number(bayar.value)
 
-alert("Transaksi selesai")
+let kembali=uang-total
+
+if(kembali<0){
+
+let nama=prompt("Nama pembeli hutang")
+
+hutang.push({
+
+nama:nama,
+sisa:Math.abs(kembali),
+tanggal:new Date().toLocaleDateString()
+
+})
 
 }
 
+keranjang.forEach(k=>{
 
-function tampilHutang(){
+let p=produk.find(x=>x.barcode==k.barcode)
 
-listHutang.innerHTML=""
+p.stok-=k.qty
 
-hutang.forEach((h,i)=>{
+})
 
-listHutang.innerHTML+=`
+transaksi.push({
+
+tanggal:new Date(),
+items:keranjang
+
+})
+
+keranjang=[]
+
+save()
+
+alert("transaksi selesai")
+
+kasirMenu()
+
+}
+
+function stokMenu(){
+
+document.getElementById("content").innerHTML=`
+
+<h2>Stok Masuk</h2>
+
+Barcode <input id="b">
+
+Qty <input id="q" type="number">
+
+<button onclick="stokMasuk()">Tambah</button>
+
+`
+
+}
+
+function stokMasuk(){
+
+let p=produk.find(x=>x.barcode==b.value)
+
+if(!p)return alert("tidak ada")
+
+p.stok+=Number(q.value)
+
+save()
+
+alert("stok ditambah")
+
+}
+
+function hutangMenu(){
+
+let html="<h2>Hutang</h2><table><tr><th>Nama</th><th>Sisa</th><th>Tanggal</th></tr>"
+
+hutang.forEach(h=>{
+
+html+=`<tr><td>${h.nama}</td><td>${rupiah(h.sisa)}</td><td>${h.tanggal}</td></tr>`
+
+})
+
+html+="</table>"
+
+content.innerHTML=html
+
+}
+
+function laporanMenu(){
+
+let hari=new Date().toLocaleDateString()
+
+let data={}
+
+transaksi.forEach(t=>{
+
+t.items.forEach(i=>{
+
+if(!data[i.nama]){
+
+data[i.nama]={
+
+qty:0,
+modal:i.modal,
+jual:i.jual
+
+}
+
+}
+
+data[i.nama].qty+=i.qty
+
+})
+
+})
+
+let html=`<h2>Laporan Hari Ini</h2>
+
+<table>
+
+<tr>
+<th>Barang</th>
+<th>Qty</th>
+<th>Modal</th>
+<th>Jual</th>
+<th>Penjualan</th>
+<th>Untung</th>
+<th>%</th>
+</tr>
+
+`
+
+let totalModal=0
+let totalJual=0
+
+for(let k in data){
+
+let d=data[k]
+
+let modal=d.qty*d.modal
+let jual=d.qty*d.jual
+let untung=jual-modal
+let persen=Math.round((untung/modal)*100)
+
+totalModal+=modal
+totalJual+=jual
+
+html+=`
 
 <tr>
 
-<td>${h.tanggal}</td>
-
-<td>${h.nama}</td>
-
-<td>Rp ${rupiah(h.jumlah)}</td>
-
-<td>${h.status}</td>
-
-<td><button onclick="lunasi(${i})">Lunasi</button></td>
+<td>${k}</td>
+<td>${d.qty}</td>
+<td>${rupiah(d.modal)}</td>
+<td>${rupiah(d.jual)}</td>
+<td>${rupiah(jual)}</td>
+<td>${rupiah(untung)}</td>
+<td>${persen}%</td>
 
 </tr>
 
 `
 
-})
+}
+
+let totalUntung=totalJual-totalModal
+
+let persenTotal=Math.round((totalUntung/totalModal)*100)
+
+html+=`
+
+</table>
+
+<br>
+
+Total Modal : ${rupiah(totalModal)}<br>
+Total Penjualan : ${rupiah(totalJual)}<br>
+Total Untung : ${rupiah(totalUntung)}<br>
+Persentase : ${persenTotal}%
+
+`
+
+content.innerHTML=html
 
 }
 
-
-function lunasi(i){
-
-hutang[i].status="Lunas"
-
-localStorage.setItem("hutang",JSON.stringify(hutang))
-
-tampilHutang()
-
-}
-
-
-function tampilLaporan(){
-
-let today=new Date().toLocaleDateString()
-
-let hari=transaksi.filter(t=>t.tanggal==today)
-
-let totalHarian=hari.reduce((a,b)=>a+b.total,0)
-
-laporanHari.innerHTML="Total Penjualan : Rp "+rupiah(totalHarian)
-
-}
-
-
-function exportExcel(){
-
-let ws=XLSX.utils.json_to_sheet(transaksi)
-
-let wb=XLSX.utils.book_new()
-
-XLSX.utils.book_append_sheet(wb,ws,"Laporan")
-
-XLSX.writeFile(wb,"laporan.xlsx")
-
-}
-
-
-function resetLaporan(){
-
-if(confirm("Reset laporan?")){
-
-transaksi=[]
-
-localStorage.removeItem("transaksi")
-
-tampilLaporan()
-
-}
-
-}
-
-
-function resetHutang(){
-
-if(confirm("Reset hutang?")){
-
-hutang=[]
-
-localStorage.removeItem("hutang")
-
-tampilHutang()
-
-}
-
-}
-
-
-function alertStok(){
-
-stokAlert.innerHTML=""
-
-inventory.forEach(b=>{
-
-if(b.stok<=b.min){
-
-stokAlert.innerHTML+=`⚠ ${b.nama} stok tinggal ${b.stok}<br>`
-
-}
-
-})
-
-}
+dashboard()
 
 </script>
 
