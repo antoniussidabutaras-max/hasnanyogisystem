@@ -1,13 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>HASNAN YOGI POS SYSTEM</title>
+<title>TOKO SEMBAKO HASNA & YOGI</title>
 
+<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- BARCODE SCAN -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<!-- EXCEL -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
 
@@ -18,7 +25,7 @@ background:#f4f6f9;
 }
 
 header{
-background:#1f2937;
+background:#2c3e50;
 color:white;
 padding:15px;
 text-align:center;
@@ -28,135 +35,179 @@ font-size:20px;
 nav{
 display:flex;
 flex-wrap:wrap;
-background:#374151;
+background:#34495e;
 }
 
 nav button{
 flex:1;
-padding:10px;
+padding:12px;
 border:none;
-background:#374151;
+background:#34495e;
 color:white;
-cursor:pointer;
+font-size:14px;
 }
 
 nav button:hover{
-background:#111827;
-}
-
-.container{
-padding:12px;
+background:#2c3e50;
 }
 
 .section{
 display:none;
-background:white;
-padding:12px;
-border-radius:6px;
+padding:15px;
 }
 
 .active{
 display:block;
 }
 
+.card{
+background:white;
+padding:15px;
+border-radius:8px;
+margin-bottom:15px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
 input,select{
 width:100%;
 padding:8px;
-margin:4px 0;
+margin-top:5px;
+margin-bottom:10px;
 }
 
-button{
-padding:8px;
-margin:3px 0;
-border:none;
-background:#2563eb;
-color:white;
-cursor:pointer;
+button.action{
+padding:8px 12px;
+margin:3px;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
-margin-top:10px;
-}
-
-th,td{
-border:1px solid #ddd;
-padding:6px;
 font-size:13px;
 }
 
-.card{
-background:#e5e7eb;
-padding:10px;
-margin:5px 0;
-border-radius:5px;
+table th,table td{
+border:1px solid #ccc;
+padding:6px;
+text-align:center;
 }
 
 .alert{
-color:red;
+background:#e74c3c;
+color:white;
+padding:10px;
+margin-top:10px;
+}
+
+.totalBox{
+font-size:18px;
 font-weight:bold;
+margin-top:10px;
+}
+
+@media(max-width:768px){
+
+table{
+font-size:11px;
+}
+
+nav button{
+font-size:12px;
+}
+
 }
 
 </style>
-
 </head>
 
 <body>
 
-<header>HASNAN YOGI POS SYSTEM</header>
+<header>
+TOKO SEMBAKO HASNA & YOGI
+</header>
 
 <nav>
 
-<button onclick="openMenu('dashboard')">Dashboard</button>
-<button onclick="openMenu('inventory')">Inventory</button>
-<button onclick="openMenu('kasir')">Kasir</button>
-<button onclick="openMenu('hutang')">Hutang</button>
-<button onclick="openMenu('laporan')">Laporan</button>
-<button onclick="openMenu('backup')">Backup</button>
-<button onclick="openMenu('grafik')">Grafik</button>
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('inventory')">Inventory</button>
+<button onclick="show('kasir')">Kasir</button>
+<button onclick="show('hutang')">Hutang</button>
+<button onclick="show('laporan')">Laporan</button>
+<button onclick="show('backup')">Backup</button>
+<button onclick="show('grafik')">Grafik</button>
 
 </nav>
 
-<div class="container">
 
 <!-- DASHBOARD -->
 
 <div id="dashboard" class="section active">
 
-<h3>Dashboard</h3>
+<div class="card">
 
-<div class="card" id="clock"></div>
+<h3>Waktu Real Time</h3>
+
+<div id="clock"></div>
+
+</div>
+
 
 <div class="card">
-Penjualan Hari Ini : Rp <span id="jualHari">0</span>
+
+<h3>Penjualan Hari Ini</h3>
+
+<div id="salesToday"></div>
+
 </div>
+
 
 <div class="card">
-Untung Hari Ini : Rp <span id="untungHari">0</span>
+
+<h3>Keuntungan Hari Ini</h3>
+
+<div id="profitToday"></div>
+
 </div>
+
 
 <div class="card">
-Persentase Untung : <span id="persenUntung">0</span> %
-</div>
 
-<h4>Alert Stok</h4>
+<h3>Persentase Keuntungan</h3>
 
-<div id="alertStok"></div>
+<div id="profitPercent"></div>
 
 </div>
+
+
+<div class="card">
+
+<h3>Alert Stok Minimum</h3>
+
+<div id="stockAlert"></div>
+
+</div>
+
+</div>
+
 
 <!-- INVENTORY -->
 
 <div id="inventory" class="section">
 
+<div class="card">
+
 <h3>Input Barang</h3>
 
-<input id="barcode" placeholder="Barcode">
+<input id="inv_barcode" placeholder="Scan Barcode">
 
-<input id="nama" placeholder="Nama Barang">
+<button onclick="startScanInventory()">Scan Kamera</button>
 
-<select id="kategori">
+<div id="readerInventory"></div>
+
+<input id="inv_name" placeholder="Nama Barang">
+
+<select id="inv_category">
+
 <option>Rokok</option>
 <option>Beras</option>
 <option>Gula</option>
@@ -164,31 +215,44 @@ Persentase Untung : <span id="persenUntung">0</span> %
 <option>Mie Instan</option>
 <option>Gas LPG</option>
 <option>Air Mineral</option>
-<option>Bumbu</option>
+<option>Bumbu Dapur</option>
 <option>Lainnya</option>
+
 </select>
 
-<input id="satuan" placeholder="Satuan">
+<select id="inv_unit">
 
-<input id="modal" type="number" placeholder="Harga Modal">
+<option>pcs</option>
+<option>kg</option>
+<option>ons</option>
+<option>meter</option>
 
-<input id="jual" type="number" placeholder="Harga Jual">
+</select>
 
-<input id="stok" type="number" placeholder="Stok">
+<input id="inv_modal" placeholder="Harga Modal">
 
-<button onclick="tambahBarang()">Simpan</button>
-<button onclick="resetInventory()">Reset</button>
+<input id="inv_sell" placeholder="Harga Jual">
 
-<button onclick="exportInventory()">Export Excel</button>
+<input id="inv_stock" placeholder="Stok">
+
+<button onclick="saveItem()" class="action">Simpan</button>
+
+<button onclick="resetInventory()" class="action">Reset</button>
+
+</div>
+
+
+<div class="card">
 
 <h3>Data Inventory</h3>
+
+<button onclick="exportInventory()">Export Excel</button>
 
 <table>
 
 <thead>
 
 <tr>
-
 <th>Barcode</th>
 <th>Nama</th>
 <th>Kategori</th>
@@ -197,110 +261,140 @@ Persentase Untung : <span id="persenUntung">0</span> %
 <th>Jual</th>
 <th>Stok</th>
 <th>Aksi</th>
-
 </tr>
 
 </thead>
 
-<tbody id="tableInventory"></tbody>
+<tbody id="inventoryTable"></tbody>
 
 </table>
 
 </div>
+
+</div>
+
 
 <!-- KASIR -->
 
 <div id="kasir" class="section">
 
-<h3>Kasir</h3>
+<div class="card">
 
-<input id="scan" placeholder="Scan Barcode">
+<h3>Input Kasir</h3>
 
-<input id="namaKasir" placeholder="Nama Barang">
+<input id="kasir_barcode" placeholder="Scan Barcode">
 
-<input id="qty" type="number" placeholder="Qty">
+<button onclick="startScanKasir()">Scan Kamera</button>
 
-<button onclick="tambahKasir()">Tambah</button>
+<div id="readerKasir"></div>
 
-<button onclick="resetKasir()">Reset</button>
+<input id="kasir_search" placeholder="Cari Nama Barang">
+
+<input id="kasir_qty" placeholder="Qty">
+
+<button onclick="addCart()">Tambah</button>
+
+<button onclick="resetCart()">Reset</button>
+
+</div>
+
+
+<div class="card">
+
+<h3>Keranjang</h3>
 
 <table>
 
 <thead>
 
 <tr>
-
 <th>Nama</th>
 <th>Qty</th>
+<th>Satuan</th>
 <th>Harga</th>
 <th>Subtotal</th>
-
 </tr>
 
 </thead>
 
-<tbody id="tableKasir"></tbody>
+<tbody id="cartTable"></tbody>
 
 </table>
 
-<h3>Total : Rp <span id="totalKasir">0</span></h3>
+<div class="totalBox">
 
-<input id="diskon" type="number" placeholder="Diskon %">
-
-<input id="bayar" type="number" placeholder="Uang Bayar">
-
-<button onclick="bayar()">Bayar</button>
-
-<h3>Kembalian : Rp <span id="kembalian">0</span></h3>
+Total : <span id="cartTotal">0</span>
 
 </div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Pembayaran</h3>
+
+<input id="discount" placeholder="Diskon %">
+
+<input id="payMoney" placeholder="Uang Bayar">
+
+<div>Kembalian : <span id="changeMoney">0</span></div>
+
+<button onclick="finishTransaction()">Selesaikan</button>
+
+</div>
+
+</div>
+
 
 <!-- HUTANG -->
 
 <div id="hutang" class="section">
 
-<h3>Data Hutang</h3>
+<div class="card">
 
-<button onclick="exportHutang()">Export Excel</button>
+<h3>Daftar Hutang</h3>
+
+<button onclick="exportDebt()">Export Excel</button>
 
 <table>
 
 <thead>
-
 <tr>
-
 <th>Nama</th>
-<th>Total</th>
+<th>Total Hutang</th>
 <th>Aksi</th>
-
 </tr>
-
 </thead>
 
-<tbody id="tableHutang"></tbody>
+<tbody id="debtTable"></tbody>
 
 </table>
 
 </div>
 
+</div>
+
+
 <!-- LAPORAN -->
 
 <div id="laporan" class="section">
 
+<div class="card">
+
 <h3>Laporan Penjualan</h3>
 
-<input type="date" id="tanggalFilter">
+<input type="date" id="reportDate">
 
-<button onclick="loadLaporan()">Tampilkan</button>
+<button onclick="loadReport()">Tampilkan</button>
 
-<button onclick="exportLaporan()">Export Excel</button>
+<button onclick="exportReport()">Export Excel</button>
 
 <table>
 
 <thead>
 
 <tr>
-
 <th>Tanggal</th>
 <th>Jam</th>
 <th>Barcode</th>
@@ -310,392 +404,114 @@ Persentase Untung : <span id="persenUntung">0</span> %
 <th>Modal</th>
 <th>Jual</th>
 <th>Untung</th>
-
+<th>%</th>
 </tr>
 
 </thead>
 
-<tbody id="tableLaporan"></tbody>
+<tbody id="reportTable"></tbody>
 
 </table>
 
 </div>
 
+</div>
+
+
 <!-- BACKUP -->
 
 <div id="backup" class="section">
+
+<div class="card">
 
 <h3>Backup Data</h3>
 
 <button onclick="exportBackup()">Export Backup</button>
 
-<input type="file" id="fileImport">
-
-<button onclick="importBackup()">Import Backup</button>
+<input type="file" onchange="importBackup(event)">
 
 </div>
+
+</div>
+
 
 <!-- GRAFIK -->
 
 <div id="grafik" class="section">
 
+<div class="card">
+
 <h3>Grafik Penjualan</h3>
 
-<canvas id="grafikPenjualan"></canvas>
+<canvas id="salesChart"></canvas>
+
+</div>
+
+<div class="card">
 
 <h3>Grafik Keuntungan</h3>
 
-<canvas id="grafikUntung"></canvas>
+<canvas id="profitChart"></canvas>
 
 </div>
 
 </div>
+
 
 <script>
 
-/* DATABASE */
+function show(id){
 
-let inventory = JSON.parse(localStorage.getItem("inventory")) || []
-let transaksi = JSON.parse(localStorage.getItem("transaksi")) || []
-let hutang = JSON.parse(localStorage.getItem("hutang")) || []
-
-/* MENU */
-
-function openMenu(id){
-
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"))
-
-document.getElementById(id).classList.add("active")
-
-}
-
-/* CLOCK */
-
-setInterval(()=>{
-
-let now=new Date()
-
-document.getElementById("clock").innerText=now.toLocaleString()
-
-},1000)
-
-/* INVENTORY */
-
-function tambahBarang(){
-
-let data={
-
-barcode:barcode.value,
-nama:nama.value,
-kategori:kategori.value,
-satuan:satuan.value,
-modal:Number(modal.value),
-jual:Number(jual.value),
-stok:Number(stok.value)
-
-}
-
-inventory.push(data)
-
-saveData()
-
-loadInventory()
-
-}
-
-function loadInventory(){
-
-let html=""
-
-inventory.forEach((b,i)=>{
-
-html+=`
-
-<tr>
-
-<td>${b.barcode}</td>
-<td>${b.nama}</td>
-<td>${b.kategori}</td>
-<td>${b.satuan}</td>
-<td>${b.modal}</td>
-<td>${b.jual}</td>
-<td>${b.stok}</td>
-
-<td>
-
-<button onclick="hapusBarang(${i})">Hapus</button>
-
-</td>
-
-</tr>
-
-`
-
+document.querySelectorAll('.section').forEach(s=>{
+s.classList.remove('active')
 })
 
-tableInventory.innerHTML=html
-
-}
-
-loadInventory()
-
-function hapusBarang(i){
-
-inventory.splice(i,1)
-
-saveData()
-
-loadInventory()
-
-}
-
-/* KASIR */
-
-let cart=[]
-
-function tambahKasir(){
-
-let namaBarang=namaKasir.value
-
-let qtyBarang=Number(qty.value)
-
-let barang=inventory.find(b=>b.nama==namaBarang)
-
-if(!barang)return alert("Barang tidak ditemukan")
-
-let subtotal=barang.jual*qtyBarang
-
-cart.push({
-
-barcode:barang.barcode,
-nama:barang.nama,
-qty:qtyBarang,
-harga:barang.jual,
-modal:barang.modal,
-subtotal:subtotal
-
-})
-
-renderKasir()
-
-}
-
-function renderKasir(){
-
-let html=""
-
-let total=0
-
-cart.forEach(c=>{
-
-total+=c.subtotal
-
-html+=`
-
-<tr>
-
-<td>${c.nama}</td>
-<td>${c.qty}</td>
-<td>${c.harga}</td>
-<td>${c.subtotal}</td>
-
-</tr>
-
-`
-
-})
-
-tableKasir.innerHTML=html
-
-totalKasir.innerText=total
-
-}
-
-/* BAYAR */
-
-function bayar(){
-
-let total=Number(totalKasir.innerText)
-
-let disk=Number(diskon.value)||0
-
-let bayarUang=Number(bayar.value)
-
-let totalDiskon=total-(total*disk/100)
-
-let kembali=bayarUang-totalDiskon
-
-kembalian.innerText=kembali
-
-let now=new Date()
-
-cart.forEach(c=>{
-
-let untung=(c.harga-c.modal)*c.qty
-
-transaksi.push({
-
-tanggal:now.toLocaleDateString(),
-jam:now.toLocaleTimeString(),
-barcode:c.barcode,
-nama:c.nama,
-qty:c.qty,
-satuan:"",
-modal:c.modal,
-jual:c.harga,
-untung:untung
-
-})
-
-let barang=inventory.find(b=>b.nama==c.nama)
-
-barang.stok-=c.qty
-
-})
-
-if(kembali<0){
-
-let namaHutang=prompt("Nama pembeli hutang")
-
-hutang.push({
-
-nama:namaHutang,
-total:Math.abs(kembali),
-tanggal:now.toLocaleDateString()
-
-})
-
-}
-
-cart=[]
-
-saveData()
-
-loadInventory()
-
-renderKasir()
-
-}
-
-/* LAPORAN */
-
-function loadLaporan(){
-
-let tgl=tanggalFilter.value
-
-let html=""
-
-transaksi.forEach(t=>{
-
-if(!tgl || t.tanggal==tgl){
-
-html+=`
-
-<tr>
-
-<td>${t.tanggal}</td>
-<td>${t.jam}</td>
-<td>${t.barcode}</td>
-<td>${t.nama}</td>
-<td>${t.qty}</td>
-<td>${t.satuan}</td>
-<td>${t.modal}</td>
-<td>${t.jual}</td>
-<td>${t.untung}</td>
-
-</tr>
-
-`
-
-}
-
-})
-
-tableLaporan.innerHTML=html
-
-}
-
-/* ALERT STOK */
-
-function cekStok(){
-
-let html=""
-
-inventory.forEach(b=>{
-
-if(b.stok<10){
-
-html+=`<div class="alert">${b.nama} stok tinggal ${b.stok}</div>`
-
-}
-
-})
-
-alertStok.innerHTML=html
-
-}
-
-setInterval(cekStok,3000)
-
-/* BACKUP */
-
-function exportBackup(){
-
-let data={inventory,transaksi,hutang}
-
-let blob=new Blob([JSON.stringify(data)],{type:"application/json"})
-
-let url=URL.createObjectURL(blob)
-
-let a=document.createElement("a")
-
-a.href=url
-
-a.download="backup_pos.json"
-
-a.click()
-
-}
-
-function importBackup(){
-
-let file=fileImport.files[0]
-
-let reader=new FileReader()
-
-reader.onload=function(){
-
-let data=JSON.parse(reader.result)
-
-inventory=data.inventory
-
-transaksi=data.transaksi
-
-hutang=data.hutang
-
-saveData()
-
-loadInventory()
-
-alert("Import berhasil")
-
-}
-
-reader.readAsText(file)
-
-}
-
-/* SAVE */
-
-function saveData(){
-
-localStorage.setItem("inventory",JSON.stringify(inventory))
-localStorage.setItem("transaksi",JSON.stringify(transaksi))
-localStorage.setItem("hutang",JSON.stringify(hutang))
+document.getElementById(id).classList.add('active')
 
 }
 
 </script>
 
-</body>
-</html>
+
+<script>
+
+/* DATABASE */
+
+let inventory = JSON.parse(localStorage.getItem("inventory") || "[]")
+let transaksi = JSON.parse(localStorage.getItem("transaksi") || "[]")
+let hutang = JSON.parse(localStorage.getItem("hutang") || "[]")
+let cart = []
+
+</script>
+
+
+<script>
+
+/* FORMAT RUPIAH */
+
+function rupiah(n){
+
+return "Rp "+Number(n).toLocaleString("id-ID")+",-"
+
+}
+
+</script>
+
+
+<script>
+
+/* CLOCK */
+
+function clock(){
+
+let d=new Date()
+
+document.getElementById("clock").innerHTML=
+d.toLocaleDateString()+" "+
+d.toLocaleTimeString()
+
+}
+
+setInterval(clock,1000)
+
+</script>
