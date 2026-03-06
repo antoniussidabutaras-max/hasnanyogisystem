@@ -286,7 +286,7 @@ TOKO SEMBAKO HASNA & YOGI
 
 <button onclick="startScanKasir()">Scan Kamera</button>
 
-<div id="reader_Kasir"></div>
+<div id="reader_kasir"></div>
 
 <input id="kasir_search" placeholder="Cari Nama Barang">
 
@@ -336,11 +336,11 @@ Total : <span id="cartTotal">0</span>
 
 <input id="discount" placeholder="Diskon %">
 
-<input id="payMoney" placeholder="Uang Bayar">
+<input id="bayar_uang" placeholder="Uang Bayar">
 
 <div>Kembalian : <span id="changeMoney">0</span></div>
 
-<button onclick="finishTransaction()">Selesaikan</button>
+<button onclick="prosesBayar()">Selesaikan</button>
 
 </div>
 
@@ -1394,7 +1394,6 @@ totalProfit += t.untung
 
 })
 
-let percent = 0
 
 if(totalSales>0){
 percent = (totalProfit/totalSales*100).toFixed(2)
@@ -1456,5 +1455,6 @@ cekStokMinimum()
 dashboardToday()
   
 </script>
+
 
 
