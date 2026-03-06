@@ -390,24 +390,27 @@ let cart=[]
 function show(id){
 
 document.querySelectorAll(".section").forEach(s=>s.style.display="none")
-
 document.getElementById(id).style.display="block"
+
+if(id==="dashboard") dashboardUpdate()
 
 }
 
 show("dashboard")
 
 function rupiah(n){
-
 return "Rp "+Number(n).toLocaleString("id-ID")
-
 }
 
 function saveBarang(){
 
-let barcode=inv_barcode.value
+let barcode=inv_barcode.value.trim()
+let nama=inv_nama.value.trim()
 
-let nama=inv_nama.value
+if(!barcode || !nama){
+alert("Barcode dan Nama wajib")
+return
+}
 
 let item=inventory.find(i=>i.nama==nama)
 
@@ -415,6 +418,7 @@ if(item){
 
 if(!item.barcodes)item.barcodes=[]
 
+if(!item.barcodes.includes(barcode))
 item.barcodes.push(barcode)
 
 }else{
@@ -422,17 +426,11 @@ item.barcodes.push(barcode)
 inventory.push({
 
 nama:nama,
-
 barcodes:[barcode],
-
 kategori:inv_kategori.value,
-
 satuan:inv_satuan.value,
-
 modal:Number(inv_modal.value),
-
 jual:Number(inv_jual.value),
-
 stok:Number(inv_stok.value)
 
 })
@@ -456,17 +454,11 @@ inventoryTable.innerHTML+=`
 <tr>
 
 <td>${i.barcodes.join(",")}</td>
-
 <td>${i.nama}</td>
-
 <td>${i.kategori}</td>
-
 <td>${i.satuan}</td>
-
 <td>${rupiah(i.modal)}</td>
-
 <td>${rupiah(i.jual)}</td>
-
 <td>${i.stok}</td>
 
 <td>
@@ -484,6 +476,8 @@ inventoryTable.innerHTML+=`
 }
 
 function hapusBarang(i){
+
+if(!confirm("Hapus barang?")) return
 
 inventory.splice(i,1)
 
@@ -545,13 +539,31 @@ renderInventory()
 scanBarcode.focus()
 
 }
+
+function hapusCart(i){
+
+let item=cart[i]
+
+let inv=inventory.find(a=>a.nama==item.nama)
+
+if(inv){
+inv.stok+=item.qty
+}
+
+cart.splice(i,1)
+
+renderCart()
+renderInventory()
+
+}
+
 function renderCart(){
 
 cartTable.innerHTML=""
 
 let total=0
 
-cart.forEach(c=>{
+cart.forEach((c,i)=>{
 
 total+=c.subtotal
 
@@ -561,13 +573,20 @@ cartTable.innerHTML+=`
 
 <td>${c.nama}</td>
 
-<td>${c.qty}</td>
+<td>
+<input type="number" value="${c.qty}" min="1"
+onchange="editQty(${i},this.value)">
+</td>
 
 <td>${c.satuan}</td>
 
 <td>${rupiah(c.jual)}</td>
 
 <td>${rupiah(c.subtotal)}</td>
+
+<td>
+<button onclick="hapusCart(${i})">❌</button>
+</td>
 
 </tr>
 
@@ -585,31 +604,72 @@ cartTotal.innerText=rupiah(totalAkhir)
 
 }
 
+function editQty(i,val){
+
+let qty=parseInt(val)
+
+if(qty<1)return
+
+let item=cart[i]
+
+let inv=inventory.find(a=>a.nama==item.nama)
+
+let selisih=qty-item.qty
+
+if(inv.stok<selisih){
+
+alert("Stok tidak cukup")
+
+renderCart()
+
+return
+
+}
+
+inv.stok-=selisih
+
+item.qty=qty
+item.subtotal=item.qty*item.jual
+
+renderCart()
+renderInventory()
+
+}
+
 function bayar(){
+
+if(cart.length==0){
+alert("Cart kosong")
+return
+}
 
 let total=cart.reduce((a,b)=>a+b.subtotal,0)
 
-let uang=Number(bayar.value)
+let diskonPersen=parseFloat(diskon.value)||0
 
-let kembali=uang-total
+let potongan=total*(diskonPersen/100)
+
+let totalAkhir=total-potongan
+
+let uang=Number(bayar.value)||0
+
+let kembali=uang-totalAkhir
 
 kembalian.innerText=rupiah(kembali)
 
-if(uang<total){
+if(uang<totalAkhir){
 
 let nama=prompt("Nama pelanggan hutang")
+
+if(!nama) nama="Pelanggan"
 
 hutang.push({
 
 nama:nama,
-
 tanggal:new Date().toLocaleDateString(),
-
-total:total,
-
+total:totalAkhir,
 dibayar:uang,
-
-sisa:total-uang
+sisa:totalAkhir-uang
 
 })
 
@@ -620,21 +680,13 @@ cart.forEach(c=>{
 transaksi.push({
 
 tanggal:new Date().toLocaleDateString(),
-
 jam:new Date().toLocaleTimeString(),
-
 barcode:c.barcode,
-
 nama:c.nama,
-
 qty:c.qty,
-
 satuan:c.satuan,
-
 modal:c.modal,
-
 jual:c.jual,
-
 untung:(c.jual-c.modal)*c.qty
 
 })
@@ -642,17 +694,15 @@ untung:(c.jual-c.modal)*c.qty
 })
 
 localStorage.setItem("transaksi",JSON.stringify(transaksi))
-
 localStorage.setItem("hutang",JSON.stringify(hutang))
+localStorage.setItem("inventory",JSON.stringify(inventory))
 
 cart=[]
 
 renderCart()
-
 renderHutang()
-
 renderLaporan()
-  
+
 dashboardUpdate()
 
 }
@@ -668,13 +718,9 @@ hutangTable.innerHTML+=`
 <tr>
 
 <td>${h.nama}</td>
-
 <td>${h.tanggal}</td>
-
 <td>${rupiah(h.total)}</td>
-
 <td>${rupiah(h.dibayar)}</td>
-
 <td>${rupiah(h.sisa)}</td>
 
 </tr>
@@ -725,84 +771,6 @@ totalUntung.innerText=rupiah(untung)
 
 }
 
-function backupData(){
-
-let data={inventory,transaksi,hutang}
-
-let blob=new Blob([JSON.stringify(data)])
-
-let a=document.createElement("a")
-
-a.href=URL.createObjectURL(blob)
-
-a.download="backup_toko.json"
-
-a.click()
-
-}
-
-function importData(e){
-
-let file=e.target.files[0]
-
-let reader=new FileReader()
-
-reader.onload=function(){
-
-let data=JSON.parse(reader.result)
-
-inventory=data.inventory
-transaksi=data.transaksi
-hutang=data.hutang
-
-localStorage.setItem("inventory",JSON.stringify(inventory))
-localStorage.setItem("transaksi",JSON.stringify(transaksi))
-localStorage.setItem("hutang",JSON.stringify(hutang))
-
-renderInventory()
-renderHutang()
-renderLaporan()
-
-}
-
-reader.readAsText(file)
-
-}
-
-renderInventory()
-renderHutang()
-renderLaporan()
-
-setInterval(()=>{
-
-time.innerText=new Date().toLocaleString()
-
-},1000)
-
-scanBarcode.addEventListener("keypress",function(e){
-
-if(e.key==="Enter"){
-
-tambahKasir()
-
-}
-
-})
-
-searchNama.addEventListener("input",function(){
-
-let keyword=this.value.toLowerCase()
-
-let item=inventory.find(i=>i.nama.toLowerCase().includes(keyword))
-
-if(item){
-
-scanBarcode.value=item.barcodes[0]
-
-}
-
-})
-
 function dashboardUpdate(){
 
 let today=new Date().toLocaleDateString()
@@ -848,7 +816,7 @@ transaksi.forEach(t=>{
 
 let bulan=t.tanggal.split("/")[1]
 
-if(!dataBulan[bulan])dataBulan[bulan]=0
+if(!dataBulan[bulan]) dataBulan[bulan]=0
 
 dataBulan[bulan]+=t.jual*t.qty
 
@@ -893,9 +861,37 @@ tambahKasir()
 )
 
 }
-  
+
+setInterval(()=>{
+
+time.innerText=new Date().toLocaleString()
+
+},1000)
+
+scanBarcode.addEventListener("keypress",function(e){
+
+if(e.key==="Enter") tambahKasir()
+
+})
+
+searchNama.addEventListener("input",function(){
+
+let keyword=this.value.toLowerCase()
+
+let item=inventory.find(i=>i.nama.toLowerCase().includes(keyword))
+
+if(item) scanBarcode.value=item.barcodes[0]
+
+})
+
+renderInventory()
+renderHutang()
+renderLaporan()
+dashboardUpdate()
+
 </script>
 
 </body>
 </html>
+
 
