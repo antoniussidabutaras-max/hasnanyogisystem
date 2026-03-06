@@ -202,9 +202,9 @@ TOKO SEMBAKO HASNA & YOGI
 
 <button onclick="startScanInventory()">Scan Kamera</button>
 
-<div id="readerInventory"></div>
+<div id="reader_inventory"></div>
 
-<input id="inv_name" placeholder="Nama Barang">
+<input id="inv_nama" placeholder="Nama Barang">
 
 <select id="inv_category">
 
@@ -235,7 +235,7 @@ TOKO SEMBAKO HASNA & YOGI
 
 <input id="inv_stock" placeholder="Stok">
 
-<button onclick="saveItem()" class="action">Simpan</button>
+<button onclick="saveInventory()" class="action">Simpan</button>
 
 <button onclick="resetInventory()" class="action">Reset</button>
 
@@ -286,13 +286,13 @@ TOKO SEMBAKO HASNA & YOGI
 
 <button onclick="startScanKasir()">Scan Kamera</button>
 
-<div id="readerKasir"></div>
+<div id="reader_Kasir"></div>
 
 <input id="kasir_search" placeholder="Cari Nama Barang">
 
 <input id="kasir_qty" placeholder="Qty">
 
-<button onclick="addCart()">Tambah</button>
+<button onclick="addToCart()">Tambah</button>
 
 <button onclick="resetCart()">Reset</button>
 
@@ -317,7 +317,7 @@ TOKO SEMBAKO HASNA & YOGI
 
 </thead>
 
-<tbody id="cartTable"></tbody>
+<tbody id="kasirTable"></tbody>
 
 </table>
 
@@ -477,10 +477,6 @@ document.getElementById(id).classList.add('active')
 
 /* DATABASE */
 
-let inventory = JSON.parse(localStorage.getItem("inventory") || "[]")
-let transaksi = JSON.parse(localStorage.getItem("transaksi") || "[]")
-let hutang = JSON.parse(localStorage.getItem("hutang") || "[]")
-let cart = []
 
 </script>
 
@@ -566,11 +562,11 @@ function saveInventory(){
 
 let barcode = document.getElementById("inv_barcode").value.trim()
 let nama = document.getElementById("inv_nama").value.trim()
-let kategori = document.getElementById("inv_kategori").value
-let satuan = document.getElementById("inv_satuan").value
+let kategori = document.getElementById("inv_category").value
+let satuan = document.getElementById("inv_unit").value
 let modal = parseFloat(document.getElementById("inv_modal").value)
-let jual = parseFloat(document.getElementById("inv_jual").value)
-let stok = parseFloat(document.getElementById("inv_stok").value)
+let jual = parseFloat(document.getElementById("inv_sell").value)
+let stok = parseFloat(document.getElementById("inv_stock").value)
 
 if(!nama){
 alert("Nama barang wajib diisi")
@@ -620,8 +616,8 @@ function resetInventoryForm(){
 document.getElementById("inv_barcode").value=""
 document.getElementById("inv_nama").value=""
 document.getElementById("inv_modal").value=""
-document.getElementById("inv_jual").value=""
-document.getElementById("inv_stok").value=""
+document.getElementById("inv_sell").value=""
+document.getElementById("inv_stock").value=""
 
 }
 
@@ -693,7 +689,9 @@ CARI BARANG
 
 function findByBarcode(code){
 
-return inventory.find(i => i.barcodes.includes(code))
+return inventory.find(item =>
+item.barcodes && item.barcodes.includes(code)
+)
 
 }
 
@@ -711,7 +709,7 @@ KASIR ENGINE
 function addToCart(){
 
 let barcode = document.getElementById("kasir_barcode").value.trim()
-let nama = document.getElementById("kasir_nama").value.trim()
+let nama = document.getElementById("kasir_search").value.trim()
 let qty = parseFloat(document.getElementById("kasir_qty").value)
 
 let item = null
@@ -812,7 +810,7 @@ table.appendChild(tr)
 
 })
 
-document.getElementById("kasir_total").innerText = rupiah(total)
+document.getElementById("cartTotal").innerText = rupiah(total)
 
 }
 
@@ -868,11 +866,92 @@ hutang.push({
 
 nama:nama,
 tanggal:new Date().toLocaleDateString(),
-items:keranjang,
+jam:new Date().toLocaleTimeString(),
+
+items: JSON.parse(JSON.stringify(keranjang)),
+
 total:finalTotal,
-dibayar:bayar
+dibayar:bayar,
+sisa: finalTotal - bayar
 
 })
+
+function renderHutang(){
+
+let table = document.getElementById("debtTable")
+
+if(!table) return
+
+table.innerHTML=""
+
+hutang.forEach((h,i)=>{
+
+let tr=document.createElement("tr")
+
+tr.innerHTML=`
+
+<td>${h.nama}</td>
+
+<td>${rupiah(h.sisa)}</td>
+
+<td>
+
+<button onclick="detailHutang(${i})">Detail</button>
+
+<button onclick="bayarHutang(${i})">Bayar</button>
+
+</td>
+
+`
+
+table.appendChild(tr)
+
+})
+
+}
+
+function detailHutang(i){
+
+let h = hutang[i]
+
+let text = "Hutang "+h.nama+"\n\n"
+
+h.items.forEach(it=>{
+
+text += it.nama+" x"+it.qty+" = "+rupiah(it.subtotal)+"\n"
+
+})
+
+text += "\nSisa : "+rupiah(h.sisa)
+
+alert(text)
+
+}
+
+function bayarHutang(i){
+
+let bayar = prompt("Masukkan jumlah bayar")
+
+bayar = parseFloat(bayar)
+
+if(!bayar) return
+
+hutang[i].dibayar += bayar
+hutang[i].sisa -= bayar
+
+if(hutang[i].sisa <= 0){
+
+alert("Hutang lunas")
+
+hutang.splice(i,1)
+
+}
+
+localStorage.setItem("hutang",JSON.stringify(hutang))
+
+renderHutang()
+
+}
 
 localStorage.setItem("hutang",JSON.stringify(hutang))
 
@@ -917,6 +996,7 @@ renderCart()
 
 
 renderInventory()
+renderHutang()
 
 </script>
 
@@ -1013,7 +1093,7 @@ alertList.push(item.nama + " ("+item.stok+")")
 
 })
 
-let box = document.getElementById("stok_alert")
+let box = document.getElementById("stockAlert")
 
 if(box){
 
@@ -1052,7 +1132,21 @@ downloadExcel(data,"inventory.xlsx")
 
 function exportLaporanExcel(){
 
-let data = transaksi.map(t=>({
+let data = []
+let totalModal = 0
+let totalSales = 0
+let totalProfit = 0
+
+transaksi.forEach(t=>{
+
+let modal = t.modal * t.qty
+let jual = t.jual * t.qty
+
+totalModal += modal
+totalSales += jual
+totalProfit += t.untung
+
+data.push({
 
 Tanggal:t.tanggal,
 Jam:t.jam,
@@ -1060,11 +1154,18 @@ Barcode:t.barcode,
 Nama:t.nama,
 Qty:t.qty,
 Satuan:t.satuan,
-Modal:t.modal,
-Jual:t.jual,
+Modal:modal,
+Jual:jual,
 Untung:t.untung
 
-}))
+})
+
+})
+
+data.push({})
+data.push({Nama:"TOTAL MODAL",Qty:totalModal})
+data.push({Nama:"TOTAL PENJUALAN",Qty:totalSales})
+data.push({Nama:"TOTAL UNTUNG",Qty:totalProfit})
 
 downloadExcel(data,"laporan.xlsx")
 
@@ -1171,7 +1272,7 @@ let sales = Object.values(monthlySales)
 
 let profit = Object.values(monthlyProfit)
 
-let ctx = document.getElementById("chart_penjualan")
+let ctx = document.getElementById("salesChart")
 
 if(ctx){
 
@@ -1271,5 +1372,89 @@ cekStokMinimum()
 
 renderGrafik()
 
+/* =========================
+DASHBOARD ENGINE
+========================= */
+
+function dashboardToday(){
+
+let today = new Date().toLocaleDateString("id-ID")
+
+let totalSales = 0
+let totalProfit = 0
+
+transaksi.forEach(t=>{
+
+if(t.tanggal === today){
+
+totalSales += t.jual * t.qty
+totalProfit += t.untung
+
+}
+
+})
+
+let percent = 0
+
+if(totalSales>0){
+percent = (totalProfit/totalSales*100).toFixed(2)
+}
+
+document.getElementById("salesToday").innerText = rupiah(totalSales)
+
+document.getElementById("profitToday").innerText = rupiah(totalProfit)
+
+document.getElementById("profitPercent").innerText = percent + " %"
+
+}
+setInterval(dashboardToday,3000)
+
+let salesEl = document.getElementById("salesToday")
+let profitEl = document.getElementById("profitToday")
+let percentEl = document.getElementById("profitPercent")
+
+if(salesEl) salesEl.innerHTML = rupiah(totalSales)
+if(profitEl) profitEl.innerHTML = rupiah(totalProfit)
+if(percentEl) percentEl.innerHTML = percent+" %"
+
+}
+
+setInterval(dashboardToday,2000)
+
+/* =========================
+MOBILE OPTIMIZATION
+========================= */
+
+@media(max-width:600px){
+
+nav button{
+font-size:11px;
+padding:10px;
+}
+
+table{
+font-size:10px;
+}
+
+input{
+font-size:14px;
+}
+
+button{
+font-size:12px;
+}
+
+.card{
+padding:10px;
+}
+
+}
+
+renderInventory()
+renderHutang()
+cekStokMinimum()
+dashboardToday()
+  
 </script>
+
 
