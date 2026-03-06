@@ -461,45 +461,6 @@ resetFormInventory()
 
 }
 
-let barcode=inv_barcode.value.trim()
-let nama=inv_nama.value.trim()
-
-if(!barcode || !nama){
-alert("Barcode dan Nama wajib")
-return
-}
-
-let item=inventory.find(i=>i.nama==nama)
-
-if(item){
-
-if(!item.barcodes)item.barcodes=[]
-
-if(!item.barcodes.includes(barcode))
-item.barcodes.push(barcode)
-
-}else{
-
-inventory.push({
-
-nama:nama,
-barcodes:[barcode],
-kategori:inv_kategori.value,
-satuan:inv_satuan.value,
-modal:Number(inv_modal.value),
-jual:Number(inv_jual.value),
-stok:Number(inv_stok.value)
-
-})
-
-}
-
-localStorage.setItem("inventory",JSON.stringify(inventory))
-
-renderInventory()
-
-}
-
 function renderInventory(){
 
 inventoryTable.innerHTML=""
@@ -756,6 +717,10 @@ localStorage.setItem("inventory",JSON.stringify(inventory))
 
 cart=[]
 
+diskon.value=""
+bayar.value=""
+kembalian.innerText=""
+
 renderCart()
 renderHutang()
 renderLaporan()
@@ -853,7 +818,7 @@ let alert=""
 
 inventory.forEach(i=>{
 
-if(i.stok<5){
+if(i.stok<10){
 
 alert+=`<div class="alert">${i.nama} stok ${i.stok}</div>`
 
@@ -864,6 +829,8 @@ alert+=`<div class="alert">${i.nama} stok ${i.stok}</div>`
 alertStock.innerHTML=alert
 
 }
+
+let chart
 
 function renderGrafik(){
 
@@ -881,7 +848,9 @@ dataBulan[bulan]+=t.jual*t.qty
 
 let ctx=document.getElementById("chartSales")
 
-new Chart(ctx,{
+if(chart) chart.destroy()
+
+chart=new Chart(ctx,{
 
 type:"bar",
 
@@ -960,10 +929,29 @@ inv_stok.value=""
 
 }
 
+function startScan(){
+
+let reader=new Html5Qrcode("reader")
+
+reader.start(
+{ facingMode:"environment" },
+{ fps:10, qrbox:250 },
+(code)=>{
+
+inv_barcode.value=code
+
+reader.stop()
+
+}
+)
+
+}
+
 </script>
 
 </body>
 </html>
+
 
 
 
