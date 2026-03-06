@@ -920,3 +920,356 @@ renderInventory()
 
 </script>
 
+<script>
+
+/* =========================
+SCAN BARCODE CAMERA
+========================= */
+
+function startScanInventory(){
+
+const reader = document.getElementById("reader_inventory")
+
+reader.innerHTML=""
+
+const html5QrCode = new Html5Qrcode("reader_inventory")
+
+Html5Qrcode.getCameras().then(devices => {
+
+let cameraId = devices[devices.length-1].id
+
+html5QrCode.start(
+
+cameraId,
+
+{ fps:10, qrbox:250 },
+
+(decodedText)=>{
+
+document.getElementById("inv_barcode").value = decodedText
+
+html5QrCode.stop()
+
+reader.innerHTML=""
+
+}
+
+)
+
+})
+
+}
+
+function startScanKasir(){
+
+const reader = document.getElementById("reader_kasir")
+
+reader.innerHTML=""
+
+const html5QrCode = new Html5Qrcode("reader_kasir")
+
+Html5Qrcode.getCameras().then(devices => {
+
+let cameraId = devices[devices.length-1].id
+
+html5QrCode.start(
+
+cameraId,
+
+{ fps:10, qrbox:250 },
+
+(decodedText)=>{
+
+document.getElementById("kasir_barcode").value = decodedText
+
+html5QrCode.stop()
+
+reader.innerHTML=""
+
+}
+
+)
+
+})
+
+}
+
+
+/* =========================
+ALERT STOK MINIMUM
+========================= */
+
+function cekStokMinimum(){
+
+let alertList = []
+
+inventory.forEach(item=>{
+
+if(item.stok < 10){
+
+alertList.push(item.nama + " ("+item.stok+")")
+
+}
+
+})
+
+let box = document.getElementById("stok_alert")
+
+if(box){
+
+box.innerHTML = alertList.length
+? "⚠ Stok hampir habis : " + alertList.join(", ")
+: "Stok aman"
+
+}
+
+}
+
+setInterval(cekStokMinimum,3000)
+
+
+/* =========================
+EXPORT EXCEL
+========================= */
+
+function exportInventoryExcel(){
+
+let data = inventory.map(i=>({
+
+Barcode:i.barcodes.join(","),
+Nama:i.nama,
+Kategori:i.kategori,
+Satuan:i.satuan,
+Modal:i.modal,
+Jual:i.jual,
+Stok:i.stok
+
+}))
+
+downloadExcel(data,"inventory.xlsx")
+
+}
+
+function exportLaporanExcel(){
+
+let data = transaksi.map(t=>({
+
+Tanggal:t.tanggal,
+Jam:t.jam,
+Barcode:t.barcode,
+Nama:t.nama,
+Qty:t.qty,
+Satuan:t.satuan,
+Modal:t.modal,
+Jual:t.jual,
+Untung:t.untung
+
+}))
+
+downloadExcel(data,"laporan.xlsx")
+
+}
+
+function downloadExcel(data,file){
+
+let worksheet = XLSX.utils.json_to_sheet(data)
+
+let workbook = XLSX.utils.book_new()
+
+XLSX.utils.book_append_sheet(workbook,worksheet,"data")
+
+XLSX.writeFile(workbook,file)
+
+}
+
+
+/* =========================
+BACKUP DATA
+========================= */
+
+function exportBackup(){
+
+let data = {
+
+inventory:inventory,
+transaksi:transaksi,
+hutang:hutang
+
+}
+
+let blob = new Blob([JSON.stringify(data)],{type:"application/json"})
+
+let url = URL.createObjectURL(blob)
+
+let a = document.createElement("a")
+
+a.href = url
+
+a.download="backup_toko.json"
+
+a.click()
+
+}
+
+function importBackup(event){
+
+let file = event.target.files[0]
+
+let reader = new FileReader()
+
+reader.onload = function(e){
+
+let data = JSON.parse(e.target.result)
+
+inventory = data.inventory || []
+transaksi = data.transaksi || []
+hutang = data.hutang || []
+
+localStorage.setItem("inventory",JSON.stringify(inventory))
+localStorage.setItem("transaksi",JSON.stringify(transaksi))
+localStorage.setItem("hutang",JSON.stringify(hutang))
+
+renderInventory()
+
+alert("Data berhasil diimport")
+
+}
+
+reader.readAsText(file)
+
+}
+
+
+/* =========================
+GRAFIK PENJUALAN
+========================= */
+
+function renderGrafik(){
+
+let monthlySales = {}
+let monthlyProfit = {}
+
+transaksi.forEach(t=>{
+
+let bulan = t.tanggal.split("/")[1]
+
+if(!monthlySales[bulan]){
+
+monthlySales[bulan] = 0
+monthlyProfit[bulan] = 0
+
+}
+
+monthlySales[bulan] += t.jual * t.qty
+monthlyProfit[bulan] += t.untung
+
+})
+
+let labels = Object.keys(monthlySales)
+
+let sales = Object.values(monthlySales)
+
+let profit = Object.values(monthlyProfit)
+
+let ctx = document.getElementById("chart_penjualan")
+
+if(ctx){
+
+new Chart(ctx,{
+
+type:"bar",
+
+data:{
+labels:labels,
+datasets:[
+
+{
+label:"Penjualan",
+data:sales
+},
+
+{
+label:"Untung",
+data:profit
+}
+
+]
+
+}
+
+})
+
+}
+
+}
+
+
+/* =========================
+RESET SYSTEM
+========================= */
+
+function resetInventory(){
+
+if(confirm("Reset semua inventory?")){
+
+inventory=[]
+localStorage.removeItem("inventory")
+
+renderInventory()
+
+}
+
+}
+
+function resetLaporan(){
+
+if(confirm("Reset laporan?")){
+
+transaksi=[]
+localStorage.removeItem("transaksi")
+
+}
+
+}
+
+function resetHutang(){
+
+if(confirm("Reset hutang?")){
+
+hutang=[]
+localStorage.removeItem("hutang")
+
+}
+
+}
+
+
+/* =========================
+RESPONSIVE MOBILE
+========================= */
+
+function mobileOptimize(){
+
+if(window.innerWidth < 600){
+
+document.body.style.fontSize="14px"
+
+}
+
+}
+
+mobileOptimize()
+
+
+/* =========================
+LOAD SYSTEM
+========================= */
+
+renderInventory()
+
+cekStokMinimum()
+
+renderGrafik()
+
+</script>
+
