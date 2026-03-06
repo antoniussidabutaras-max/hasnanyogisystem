@@ -495,18 +495,27 @@ renderInventory()
 
 function tambahKasir(){
 
-let barcode=scanBarcode.value
+let barcode=scanBarcode.value.trim()
+
+let qty=parseInt(qtyKasir.value)||1
 
 let item=inventory.find(i=>i.barcodes.includes(barcode))
 
-if(!item)return alert("Barang tidak ada")
+if(!item){
+alert("Barang tidak ada")
+return
+}
+
+if(item.stok<qty){
+alert("Stok tidak cukup")
+return
+}
 
 let exist=cart.find(c=>c.nama==item.nama)
 
 if(exist){
 
-exist.qty++
-
+exist.qty+=qty
 exist.subtotal=exist.qty*exist.jual
 
 }else{
@@ -514,31 +523,28 @@ exist.subtotal=exist.qty*exist.jual
 cart.push({
 
 barcode:barcode,
-
 nama:item.nama,
-
 satuan:item.satuan,
-
 modal:item.modal,
-
 jual:item.jual,
-
-qty:1,
-
-subtotal:item.jual
+qty:qty,
+subtotal:item.jual*qty
 
 })
 
 }
 
-item.stok--
+item.stok-=qty
+
+scanBarcode.value=""
+qtyKasir.value=1
 
 renderCart()
-
 renderInventory()
 
-}
+scanBarcode.focus()
 
+}
 function renderCart(){
 
 cartTable.innerHTML=""
@@ -569,7 +575,13 @@ cartTable.innerHTML+=`
 
 })
 
-cartTotal.innerText=rupiah(total)
+let diskonPersen=parseFloat(diskon.value)||0
+
+let potongan=total*(diskonPersen/100)
+
+let totalAkhir=total-potongan
+
+cartTotal.innerText=rupiah(totalAkhir)
 
 }
 
@@ -640,6 +652,8 @@ renderCart()
 renderHutang()
 
 renderLaporan()
+  
+dashboardUpdate()
 
 }
 
@@ -765,7 +779,123 @@ time.innerText=new Date().toLocaleString()
 
 },1000)
 
+scanBarcode.addEventListener("keypress",function(e){
+
+if(e.key==="Enter"){
+
+tambahKasir()
+
+}
+
+})
+
+searchNama.addEventListener("input",function(){
+
+let keyword=this.value.toLowerCase()
+
+let item=inventory.find(i=>i.nama.toLowerCase().includes(keyword))
+
+if(item){
+
+scanBarcode.value=item.barcodes[0]
+
+}
+
+})
+
+function dashboardUpdate(){
+
+let today=new Date().toLocaleDateString()
+
+let sales=0
+let profit=0
+
+transaksi.forEach(t=>{
+
+if(t.tanggal==today){
+
+sales+=t.jual*t.qty
+profit+=t.untung
+
+}
+
+})
+
+salesToday.innerText=rupiah(sales)
+profitToday.innerText=rupiah(profit)
+
+let alert=""
+
+inventory.forEach(i=>{
+
+if(i.stok<5){
+
+alert+=`<div class="alert">${i.nama} stok ${i.stok}</div>`
+
+}
+
+})
+
+alertStock.innerHTML=alert
+
+}
+
+function renderGrafik(){
+
+let dataBulan={}
+
+transaksi.forEach(t=>{
+
+let bulan=t.tanggal.split("/")[1]
+
+if(!dataBulan[bulan])dataBulan[bulan]=0
+
+dataBulan[bulan]+=t.jual*t.qty
+
+})
+
+let ctx=document.getElementById("chartSales")
+
+new Chart(ctx,{
+
+type:"bar",
+
+data:{
+labels:Object.keys(dataBulan),
+datasets:[{
+label:"Penjualan",
+data:Object.values(dataBulan)
+}]
+}
+
+})
+
+}
+
+renderGrafik()
+
+function startScanKasir(){
+
+let reader=new Html5Qrcode("reader")
+
+reader.start(
+{ facingMode:"environment" },
+{ fps:10, qrbox:250 },
+(code)=>{
+
+scanBarcode.value=code
+
+reader.stop()
+
+tambahKasir()
+
+}
+)
+
+}
+  
 </script>
 
 </body>
 </html>
+
