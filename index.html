@@ -515,3 +515,408 @@ d.toLocaleTimeString()
 setInterval(clock,1000)
 
 </script>
+
+<script>
+
+/* ===============================
+DATABASE LOCAL
+=============================== */
+
+let inventory = JSON.parse(localStorage.getItem("inventory")) || []
+let transaksi = JSON.parse(localStorage.getItem("transaksi")) || []
+let hutang = JSON.parse(localStorage.getItem("hutang")) || []
+
+let keranjang = []
+
+/* ===============================
+FORMAT RUPIAH
+=============================== */
+
+function rupiah(num){
+return "Rp " + Number(num).toLocaleString("id-ID") + ",-"
+}
+
+/* ===============================
+REALTIME CLOCK
+=============================== */
+
+function realtimeClock(){
+
+let now = new Date()
+
+let date = now.toLocaleDateString("id-ID")
+let time = now.toLocaleTimeString("id-ID")
+
+let elDate = document.getElementById("realtimeDate")
+let elTime = document.getElementById("realtimeTime")
+
+if(elDate) elDate.innerText = date
+if(elTime) elTime.innerText = time
+
+}
+
+setInterval(realtimeClock,1000)
+
+
+/* ===============================
+INVENTORY SYSTEM
+=============================== */
+
+function saveInventory(){
+
+let barcode = document.getElementById("inv_barcode").value.trim()
+let nama = document.getElementById("inv_nama").value.trim()
+let kategori = document.getElementById("inv_kategori").value
+let satuan = document.getElementById("inv_satuan").value
+let modal = parseFloat(document.getElementById("inv_modal").value)
+let jual = parseFloat(document.getElementById("inv_jual").value)
+let stok = parseFloat(document.getElementById("inv_stok").value)
+
+if(!nama){
+alert("Nama barang wajib diisi")
+return
+}
+
+let item = inventory.find(i => i.nama === nama)
+
+if(item){
+
+if(barcode && !item.barcodes.includes(barcode)){
+item.barcodes.push(barcode)
+}
+
+item.kategori = kategori
+item.satuan = satuan
+item.modal = modal
+item.jual = jual
+item.stok = stok
+
+}else{
+
+inventory.push({
+
+nama:nama,
+barcodes: barcode ? [barcode] : [],
+kategori:kategori,
+satuan:satuan,
+modal:modal,
+jual:jual,
+stok:stok
+
+})
+
+}
+
+localStorage.setItem("inventory",JSON.stringify(inventory))
+
+renderInventory()
+
+resetInventoryForm()
+
+}
+
+function resetInventoryForm(){
+
+document.getElementById("inv_barcode").value=""
+document.getElementById("inv_nama").value=""
+document.getElementById("inv_modal").value=""
+document.getElementById("inv_jual").value=""
+document.getElementById("inv_stok").value=""
+
+}
+
+function renderInventory(){
+
+let table = document.getElementById("inventoryTable")
+
+if(!table) return
+
+table.innerHTML=""
+
+inventory.forEach((item,i)=>{
+
+let tr = document.createElement("tr")
+
+tr.innerHTML=`
+
+<td>${item.barcodes.join(", ")}</td>
+<td>${item.nama}</td>
+<td>${item.kategori}</td>
+<td>${item.satuan}</td>
+<td>${rupiah(item.modal)}</td>
+<td>${rupiah(item.jual)}</td>
+<td>${item.stok}</td>
+
+<td>
+
+<button onclick="editInventory(${i})">Edit</button>
+<button onclick="deleteInventory(${i})">Hapus</button>
+
+</td>
+
+`
+
+table.appendChild(tr)
+
+})
+
+}
+
+function editInventory(i){
+
+let item = inventory[i]
+
+document.getElementById("inv_nama").value = item.nama
+document.getElementById("inv_modal").value = item.modal
+document.getElementById("inv_jual").value = item.jual
+document.getElementById("inv_stok").value = item.stok
+
+}
+
+function deleteInventory(i){
+
+if(confirm("Hapus barang?")){
+
+inventory.splice(i,1)
+
+localStorage.setItem("inventory",JSON.stringify(inventory))
+
+renderInventory()
+
+}
+
+}
+
+/* ===============================
+CARI BARANG
+=============================== */
+
+function findByBarcode(code){
+
+return inventory.find(i => i.barcodes.includes(code))
+
+}
+
+function findByName(name){
+
+return inventory.find(i => i.nama.toLowerCase() === name.toLowerCase())
+
+}
+
+
+/* ===============================
+KASIR ENGINE
+=============================== */
+
+function addToCart(){
+
+let barcode = document.getElementById("kasir_barcode").value.trim()
+let nama = document.getElementById("kasir_nama").value.trim()
+let qty = parseFloat(document.getElementById("kasir_qty").value)
+
+let item = null
+
+if(barcode){
+
+item = findByBarcode(barcode)
+
+}else if(nama){
+
+item = findByName(nama)
+
+}
+
+if(!item){
+
+alert("Barang tidak ditemukan")
+return
+
+}
+
+if(item.stok < qty){
+
+alert("Stok tidak cukup")
+return
+
+}
+
+let existing = keranjang.find(k => k.nama === item.nama)
+
+if(existing){
+
+existing.qty += qty
+existing.subtotal = existing.qty * existing.jual
+
+}else{
+
+keranjang.push({
+
+nama:item.nama,
+barcode:item.barcodes[0] || "-",
+satuan:item.satuan,
+modal:item.modal,
+jual:item.jual,
+qty:qty,
+subtotal:item.jual * qty
+
+})
+
+}
+
+item.stok -= qty
+
+localStorage.setItem("inventory",JSON.stringify(inventory))
+
+renderCart()
+
+renderInventory()
+
+}
+
+
+function renderCart(){
+
+let table = document.getElementById("kasirTable")
+
+if(!table) return
+
+table.innerHTML=""
+
+let total = 0
+
+keranjang.forEach((item,i)=>{
+
+total += item.subtotal
+
+let tr = document.createElement("tr")
+
+tr.innerHTML=`
+
+<td>${item.barcode}</td>
+<td>${item.nama}</td>
+<td>${item.qty}</td>
+<td>${item.satuan}</td>
+<td>${rupiah(item.jual)}</td>
+<td>${rupiah(item.subtotal)}</td>
+
+<td>
+
+<button onclick="editQty(${i})">Edit</button>
+<button onclick="removeCart(${i})">Hapus</button>
+
+</td>
+
+`
+
+table.appendChild(tr)
+
+})
+
+document.getElementById("kasir_total").innerText = rupiah(total)
+
+}
+
+
+function editQty(i){
+
+let q = prompt("Qty baru")
+
+if(!q) return
+
+keranjang[i].qty = parseFloat(q)
+
+keranjang[i].subtotal = keranjang[i].qty * keranjang[i].jual
+
+renderCart()
+
+}
+
+
+function removeCart(i){
+
+keranjang.splice(i,1)
+
+renderCart()
+
+}
+
+/* ===============================
+PEMBAYARAN
+=============================== */
+
+function prosesBayar(){
+
+let bayar = parseFloat(document.getElementById("bayar_uang").value)
+
+let total = keranjang.reduce((a,b)=>a+b.subtotal,0)
+
+let diskon = parseFloat(document.getElementById("bayar_diskon").value) || 0
+
+let potongan = total * (diskon/100)
+
+let finalTotal = total - potongan
+
+let kembali = bayar - finalTotal
+
+document.getElementById("bayar_kembali").innerText = rupiah(kembali)
+
+if(bayar < finalTotal){
+
+let nama = prompt("Nama pembeli (hutang)")
+
+hutang.push({
+
+nama:nama,
+tanggal:new Date().toLocaleDateString(),
+items:keranjang,
+total:finalTotal,
+dibayar:bayar
+
+})
+
+localStorage.setItem("hutang",JSON.stringify(hutang))
+
+}
+
+saveTransaksi(finalTotal)
+
+}
+
+
+function saveTransaksi(total){
+
+let now = new Date()
+
+keranjang.forEach(item=>{
+
+transaksi.push({
+
+tanggal: now.toLocaleDateString(),
+jam: now.toLocaleTimeString(),
+
+barcode:item.barcode,
+nama:item.nama,
+qty:item.qty,
+satuan:item.satuan,
+modal:item.modal,
+jual:item.jual,
+
+untung:(item.jual-item.modal)*item.qty
+
+})
+
+})
+
+localStorage.setItem("transaksi",JSON.stringify(transaksi))
+
+keranjang=[]
+
+renderCart()
+
+}
+
+
+renderInventory()
+
+</script>
+
