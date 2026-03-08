@@ -385,6 +385,8 @@ Total Untung: <span id="totalUntung"></span>
 
 <script>
 
+scanBarcode.focus()
+
 let inventory = JSON.parse(localStorage.getItem("inventory")) || []
 let transaksi = JSON.parse(localStorage.getItem("transaksi")) || []
 let hutang = JSON.parse(localStorage.getItem("hutang")) || []
@@ -846,7 +848,7 @@ dataBulan[bulan]+=t.jual*t.qty
 
 })
 
-let ctx=document.getElementById("chartSales")
+let ctx=document.getElementById("chartSales").getContext("2d")
 
 if(chart) chart.destroy()
 
@@ -947,10 +949,140 @@ reader.stop()
 
 }
 
+function exportInventory(){
+
+let data = JSON.stringify(inventory,null,2)
+
+let blob = new Blob([data],{type:"application/json"})
+
+let a=document.createElement("a")
+a.href=URL.createObjectURL(blob)
+a.download="inventory.json"
+a.click()
+
+}
+
+function resetInventory(){
+
+if(!confirm("Reset semua inventory?")) return
+
+inventory=[]
+
+localStorage.removeItem("inventory")
+
+renderInventory()
+
+}
+
+function resetHutang(){
+
+if(!confirm("Reset semua hutang?")) return
+
+hutang=[]
+
+localStorage.removeItem("hutang")
+
+renderHutang()
+
+}
+
+function resetLaporan(){
+
+if(!confirm("Reset semua laporan transaksi?")) return
+
+transaksi=[]
+
+localStorage.removeItem("transaksi")
+
+renderLaporan()
+
+dashboardUpdate()
+
+}
+
+function backupData(){
+
+let data={
+inventory:inventory,
+transaksi:transaksi,
+hutang:hutang
+}
+
+let blob=new Blob([JSON.stringify(data)],{type:"application/json"})
+
+let a=document.createElement("a")
+a.href=URL.createObjectURL(blob)
+a.download="backup_toko.json"
+a.click()
+
+}
+
+function importData(e){
+
+let file=e.target.files[0]
+
+let reader=new FileReader()
+
+reader.onload=function(){
+
+let data=JSON.parse(reader.result)
+
+inventory=data.inventory || []
+transaksi=data.transaksi || []
+hutang=data.hutang || []
+
+localStorage.setItem("inventory",JSON.stringify(inventory))
+localStorage.setItem("transaksi",JSON.stringify(transaksi))
+localStorage.setItem("hutang",JSON.stringify(hutang))
+
+renderInventory()
+renderHutang()
+renderLaporan()
+dashboardUpdate()
+
+}
+
+reader.readAsText(file)
+
+}
+
+function filterLaporan(){
+
+let tanggal=filterTanggal.value
+
+laporanTable.innerHTML=""
+
+transaksi.forEach(t=>{
+
+if(t.tanggal==tanggal){
+
+laporanTable.innerHTML+=`
+
+<tr>
+<td>${t.tanggal}</td>
+<td>${t.jam}</td>
+<td>${t.barcode}</td>
+<td>${t.nama}</td>
+<td>${t.qty}</td>
+<td>${t.satuan}</td>
+<td>${rupiah(t.modal)}</td>
+<td>${rupiah(t.jual)}</td>
+<td>${rupiah(t.untung)}</td>
+</tr>
+
+`
+
+}
+
+})
+
+}
+
 </script>
 
 </body>
 </html>
+
 
 
 
