@@ -787,6 +787,8 @@ let chart
 
 function renderGrafik(){
 
+if(transaksi.length==0) return
+
 let dataBulan={}
 
 transaksi.forEach(t=>{
@@ -821,18 +823,24 @@ data:Object.values(dataBulan)
 
 renderGrafik()
 
+let readerKasir
+
 function startScanKasir(){
 
-let reader=new Html5Qrcode("reader")
+if(readerKasir){
+readerKasir.stop()
+}
 
-reader.start(
+readerKasir=new Html5Qrcode("reader")
+
+readerKasir.start(
 { facingMode:"environment" },
 { fps:10, qrbox:250 },
 (code)=>{
 
 scanBarcode.value=code
 
-reader.stop()
+readerKasir.stop()
 
 tambahKasir()
 
@@ -859,14 +867,23 @@ let keyword=this.value.toLowerCase()
 
 let item=inventory.find(i=>i.nama.toLowerCase().includes(keyword))
 
-if(item) scanBarcode.value=item.barcodes[0]
+if(item && item.barcodes){
+scanBarcode.value=item.barcodes[0]
+}
 
 })
+
+window.onload=function(){
 
 renderInventory()
 renderHutang()
 renderLaporan()
 dashboardUpdate()
+renderGrafik()
+
+scanBarcode.focus()
+
+}
 
 function resetFormInventory(){
 
@@ -1051,6 +1068,7 @@ reader.stop()
 
 </body>
 </html>
+
 
 
 
