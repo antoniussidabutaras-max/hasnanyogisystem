@@ -410,55 +410,6 @@ return "Rp "+Number(n).toLocaleString("id-ID")
 
 function saveBarang(){
 
-let barcode1 = inv_barcode.value.trim()
-let barcode2 = inv_barcode2.value.trim()
-let barcode3 = inv_barcode3.value.trim()
-let barcode4 = inv_barcode4.value.trim()
-
-let barcodes = []
-
-if(barcode1) barcodes.push(barcode1)
-if(barcode2) barcodes.push(barcode2)
-if(barcode3) barcodes.push(barcode3)
-if(barcode4) barcodes.push(barcode4)
-
-let nama = inv_nama.value.trim()
-
-if(!nama){
-alert("Nama barang wajib diisi")
-return
-}
-
-let item = inventory.find(i=>i.nama.toLowerCase()==nama.toLowerCase())
-
-if(item){
-
-barcodes.forEach(b=>{
-if(!item.barcodes.includes(b)){
-item.barcodes.push(b)
-}
-})
-
-}else{
-
-inventory.push({
-
-nama:nama,
-barcodes:barcodes,
-kategori:inv_kategori.value,
-satuan:inv_satuan.value,
-modal:Number(inv_modal.value),
-jual:Number(inv_jual.value),
-stok:Number(inv_stok.value)
-
-})
-
-}
-
-localStorage.setItem("inventory",JSON.stringify(inventory))
-
-renderInventory()
-
 resetFormInventory()
 
 }
@@ -1078,10 +1029,29 @@ laporanTable.innerHTML+=`
 
 }
 
+function startScan(){
+
+let reader=new Html5Qrcode("reader")
+
+reader.start(
+{ facingMode:"environment" },
+{ fps:10, qrbox:250 },
+(code)=>{
+
+inv_barcode.value=code
+
+reader.stop()
+
+}
+)
+
+}
+
 </script>
 
 </body>
 </html>
+
 
 
 
