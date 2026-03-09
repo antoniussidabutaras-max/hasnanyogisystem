@@ -3,134 +3,68 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HASNA & YOGI POS</title>
 
-<title>TOKO SEMBAKO HASNA & YOGI</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
-.dashboard-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:15px;
-margin-bottom:20px;
-}
-
-.card{
-background:white;
-padding:15px;
-border-radius:10px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-}
-
-.card h3{
-margin-bottom:10px;
-}
-
 body{
 font-family:Arial;
+background:#f5f5f5;
 margin:0;
-background:#f4f6f8;
-}
-
-header{
-background:#2c3e50;
-color:white;
-padding:15px;
-text-align:center;
-font-size:20px;
-font-weight:bold;
 }
 
 nav{
+background:#222;
+color:white;
+padding:10px;
 display:flex;
-flex-wrap:wrap;
-background:#34495e;
+gap:10px;
 }
 
 nav button{
-flex:1;
+padding:10px;
 border:none;
-background:#34495e;
+background:#444;
 color:white;
-padding:12px;
 cursor:pointer;
-}
-
-nav button:hover{
-background:#2c3e50;
 }
 
 .section{
 display:none;
-padding:15px;
+padding:20px;
 }
 
 .card{
 background:white;
 padding:15px;
-margin-bottom:15px;
-border-radius:6px;
-box-shadow:0 2px 4px rgba(0,0,0,0.1);
-}
-
-input,select{
-width:100%;
-padding:8px;
-margin:4px 0;
-box-sizing:border-box;
-}
-
-button.action{
-background:#27ae60;
-color:white;
-border:none;
-padding:10px;
-margin-top:5px;
-cursor:pointer;
-}
-
-button.red{
-background:#e74c3c;
-color:white;
-border:none;
-padding:10px;
-cursor:pointer;
+margin-bottom:20px;
+border-radius:8px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
 table{
 width:100%;
 border-collapse:collapse;
-background:white;
 }
 
-table th,table td{
-border:1px solid #ddd;
-padding:6px;
-font-size:12px;
+th,td{
+padding:8px;
+border-bottom:1px solid #ddd;
+text-align:left;
 }
 
-table th{
-background:#ecf0f1;
+input,select{
+padding:8px;
+margin:5px;
 }
 
-.totalBox{
-font-size:18px;
-font-weight:bold;
-margin-top:10px;
-}
-
-.alert{
-color:red;
-font-weight:bold;
-}
-
-#reader{
-width:100%;
-margin-top:10px;
+.dashboard-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
 }
 
 </style>
@@ -139,19 +73,18 @@ margin-top:10px;
 
 <body>
 
-<header>TOKO SEMBAKO HASNA & YOGI</header>
-
 <nav>
 
 <button onclick="showPage('dashboard')">Dashboard</button>
-<button onclick="showPage('inventory')">Inventory</button>
 <button onclick="showPage('kasir')">Kasir</button>
+<button onclick="showPage('inventory')">Inventory</button>
 <button onclick="showPage('laporan')">Laporan</button>
-<button onclick="showPage('hutang')">Hutang</button>
 
 </nav>
 
+<!-- ===================== -->
 <!-- DASHBOARD -->
+<!-- ===================== -->
 
 <div id="dashboard" class="section">
 
@@ -165,11 +98,6 @@ margin-top:10px;
 </div>
 
 <div class="card">
-<h3>Total Transaksi</h3>
-<div id="totalTransaksi">0</div>
-</div>
-
-<div class="card">
 <h3>Keuntungan Hari Ini</h3>
 <div id="profitToday">0</div>
 </div>
@@ -179,11 +107,11 @@ margin-top:10px;
 <div id="itemSold">0</div>
 </div>
 
+<div class="card">
+<h3>Total Transaksi</h3>
+<div id="totalTransaksi">0</div>
 </div>
 
-<div class="card">
-<h3>Grafik Penjualan</h3>
-<canvas id="chartSales"></canvas>
 </div>
 
 <div class="card">
@@ -201,155 +129,33 @@ margin-top:10px;
 <div id="timeNow"></div>
 </div>
 
-</div>
-
-
-<!-- INVENTORY -->
-
-<div id="inventory" class="section">
-
-<div class="card">
-
-<h3>Input Barang</h3>
-
-<input id="inv_barcode1" placeholder="Barcode utama">
-<input id="inv_barcode2" placeholder="Barcode tambahan">
-<input id="inv_barcode3" placeholder="Barcode tambahan">
-
-<button class="action" onclick="scanInventory()">Scan Barcode Kamera</button>
-
-<input id="inv_nama" placeholder="Nama Barang">
-
-<select id="inv_kategori">
-
-<option>Rokok</option>
-<option>Sembako</option>
-<option>Mie Instan</option>
-<option>Bumbu Dapur</option>
-<option>Minuman</option>
-
-</select>
-
-<select id="inv_satuan">
-
-<option>pcs</option>
-<option>kg</option>
-<option>meter</option>
-<option>ons</option>
-
-</select>
-
-<input id="inv_modal" type="number" placeholder="Harga Modal">
-<input id="inv_jual" type="number" placeholder="Harga Jual">
-<input id="inv_stok" type="number" placeholder="Jumlah Stok">
-<input id="inv_minstok" type="number" placeholder="Minimum Stok">
-
-<button class="action" onclick="saveBarang()">Simpan Barang</button>
-<button class="red" onclick="resetInventoryForm()">Reset</button>
+<canvas id="chartSales"></canvas>
 
 </div>
 
-<div class="card">
-
-<button onclick="exportInventory()">Export Excel</button>
-<button class="red" onclick="resetInventory()">Reset Inventory</button>
-
-</div>
-
-<input id="searchInventory" placeholder="Cari barang inventory..."> 
-  
-<table>
-
-<thead>
-
-<tr>
-
-<th>Nama</th>
-<th>Kategori</th>
-<th>Satuan</th>
-<th>Modal</th>
-<th>Jual</th>
-<th>Stok</th>
-<th>Min</th>
-<th>Aksi</th>
-
-</tr>
-
-</thead>
- 
-  
-<tbody id="inventoryTable"></tbody>
-
-
-</table>
-
-</div>
-
+<!-- ===================== -->
 <!-- KASIR -->
+<!-- ===================== -->
 
 <div id="kasir" class="section">
 
+<h2>Kasir</h2>
+
 <div class="card">
 
-<input id="kasir_barcode" placeholder="Scan Barcode">
+<input id="kasir_barcode" placeholder="Scan / input barcode">
 
-<input id="searchBarang" placeholder="Cari barang...">
+<input id="kasir_qty" type="number" value="1">
+
+<button onclick="addCart()">Tambah</button>
 
 <button onclick="scanKasir()">Scan Kamera</button>
 
-<input id="kasir_nama" placeholder="Nama Barang Manual">
-
-<select id="kasir_satuan">
-
-<option>pcs</option>
-<option>kg</option>
-<option>meter</option>
-<option>ons</option>
-
-</select>
-
-<input id="kasir_qty" type="number" value="1">
-  
-<button class="action" onclick="addCart()">Tambah</button>
-<button class="red" onclick="resetCart()">Reset</button>
-
 </div>
+
+<div class="card">
 
 <table>
-
-<thead>
-
-<tr>
-
-<th>Barcode</th>
-<th>Nama</th>
-<th>Satuan</th>
-<th>Qty</th>
-<th>Modal</th>
-<th>Jual</th>
-<th>Subtotal</th>
-<th>Aksi</th>
-
-</tr>
-
-</thead>
-
-<tbody id="cartTable"></tbody>
-
-</table>
-
-<div class="card">
-
-<div>Total Modal : <span id="totalModal">0</span></div>
-<div>Total Jual : <span id="totalJual">0</span></div>
-
-</div>
-
-<div class="card">
-
-<h3>Keranjang Belanja</h3>
-
-<table width="100%">
 
 <thead>
 
@@ -369,21 +175,98 @@ margin-top:10px;
 
 <h3>Total : Rp <span id="cartTotal">0</span></h3>
 
-<button onclick="checkout()">Checkout</button>
+<input id="uangBayar" placeholder="Uang Bayar">
+
+<div>Kembalian : <span id="kembalian">0</span></div>
+
+<button onclick="bayar()">Bayar</button>
+
+<button onclick="resetCart()">Reset</button>
 
 </div>
+
+<div id="reader"></div>
+
 </div>
 
-<!-- LAPORAN -->
+<!-- ===================== -->
+<!-- INVENTORY -->
+<!-- ===================== -->
 
-<div id="laporan" class="section">
+<div id="inventory" class="section">
+
+<h2>Inventory</h2>
 
 <div class="card">
 
-<button onclick="exportLaporan()">Export Excel</button>
-<button class="red" onclick="resetLaporan()">Reset</button>
+<input id="inv_barcode1" placeholder="Barcode 1">
+<input id="inv_barcode2" placeholder="Barcode 2">
+<input id="inv_barcode3" placeholder="Barcode 3">
+
+<br>
+
+<input id="inv_nama" placeholder="Nama Barang">
+<input id="inv_kategori" placeholder="Kategori">
+<input id="inv_satuan" placeholder="Satuan">
+
+<br>
+
+<input id="inv_modal" placeholder="Modal">
+<input id="inv_jual" placeholder="Harga Jual">
+
+<br>
+
+<input id="inv_stok" placeholder="Stok">
+<input id="inv_minstok" placeholder="Min Stok">
+
+<br>
+
+<button onclick="saveBarang()">Simpan Barang</button>
+<button onclick="scanInventory()">Scan Barcode</button>
 
 </div>
+
+<div class="card">
+
+<input id="searchInventory" placeholder="Cari barang">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Nama</th>
+<th>Kategori</th>
+<th>Satuan</th>
+<th>Barcode</th>
+<th>Modal</th>
+<th>Jual</th>
+<th>Stok</th>
+<th>Min</th>
+<th>Aksi</th>
+
+</tr>
+
+</thead>
+
+<tbody id="inventoryTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- ===================== -->
+<!-- LAPORAN -->
+<!-- ===================== -->
+
+<div id="laporan" class="section">
+
+<h2>Laporan Penjualan</h2>
+
+<div class="card">
 
 <table>
 
@@ -410,56 +293,9 @@ margin-top:10px;
 
 </div>
 
-<!-- HUTANG -->
-
-<div id="hutang" class="section">
-
-<div class="card">
-
-<button onclick="exportHutang()">Export Excel</button>
-<button class="red" onclick="resetHutang()">Reset</button>
-
 </div>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Nama</th>
-<th>Total Hutang</th>
-<th>Sisa Hutang</th>
-<th>Aksi</th>
-
-</tr>
-
-</thead>
-
-<tbody id="hutangTable"></tbody>
-
-</table>
-
-</div>
-
-<input 
-id="scanInput" 
-placeholder="Scan barcode..." 
-style="width:100%;padding:10px;font-size:18px;margin-bottom:10px">
-
-<div id="reader"></div>
-
-<div id="reader"></div>
 
 <script src="app.js"></script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
