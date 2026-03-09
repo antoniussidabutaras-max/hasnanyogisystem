@@ -174,6 +174,14 @@ alertStock.innerHTML=alert
 function addCart(){
 
 let barcode = kasir_barcode.value
+let qty = Number(kasir_qty.value)
+
+if(!qty || qty<=0){
+
+alert("Qty tidak valid")
+return
+
+}
 
 let barang = inventory.find(b=>
 b.barcode1==barcode ||
@@ -183,26 +191,17 @@ b.barcode3==barcode
 
 if(!barang){
 
-barang={
-barcode1:barcode,
-nama:kasir_nama.value,
-satuan:kasir_satuan.value,
-modal:0,
-jual:0
-}
+alert("Barang tidak ditemukan")
+return
 
 }
-
-let qty = Number(kasir_qty.value)
 
 cart.push({
 
 barcode:barcode,
 nama:barang.nama,
 satuan:barang.satuan,
-
 qty:qty,
-
 modal:barang.modal,
 jual:barang.jual
 
@@ -786,3 +785,15 @@ alertStock.innerHTML = rekomendasi
 }
 
 prediksiRestok()
+
+function exportHutang(){
+
+let csv="Nama,Total,Sisa\n"
+
+hutang.forEach(h=>{
+csv+=`${h.nama},${h.total},${h.sisa}\n`
+})
+
+downloadCSV(csv,"hutang.csv")
+
+}
