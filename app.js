@@ -545,3 +545,84 @@ list += b.nama + " - " + b.jual + "\n"
 alert(list)
 
 })
+
+function loadChart(){
+
+let data = {}
+
+laporan.forEach(l=>{
+
+if(!data[l.tanggal]){
+
+data[l.tanggal]=0
+
+}
+
+data[l.tanggal]+= l.jual*l.qty
+
+})
+
+let labels = Object.keys(data)
+let values = Object.values(data)
+
+new Chart(document.getElementById("chartSales"),{
+
+type:"line",
+
+data:{
+labels:labels,
+datasets:[{
+
+label:"Penjualan",
+data:values
+
+}]
+}
+
+})
+
+}
+
+loadChart()
+
+function exportInventory(){
+
+let csv = "Nama,Kategori,Satuan,Modal,Jual,Stok\n"
+
+inventory.forEach(b=>{
+
+csv += `${b.nama},${b.kategori},${b.satuan},${b.modal},${b.jual},${b.stok}\n`
+
+})
+
+downloadCSV(csv,"inventory.csv")
+
+}
+
+function exportLaporan(){
+
+let csv="Tanggal,Jam,Barcode,Nama,Qty,Jual\n"
+
+laporan.forEach(l=>{
+
+csv+=`${l.tanggal},${l.jam},${l.barcode},${l.nama},${l.qty},${l.jual}\n`
+
+})
+
+downloadCSV(csv,"laporan.csv")
+
+}
+
+function downloadCSV(data,file){
+
+let blob = new Blob([data])
+
+let url = window.URL.createObjectURL(blob)
+
+let a = document.createElement("a")
+
+a.href=url
+a.download=file
+a.click()
+
+}
