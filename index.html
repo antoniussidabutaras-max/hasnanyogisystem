@@ -140,16 +140,36 @@ margin-top:10px;
 <div class="card">
 <h3>Barang Paling Laku</h3>
 <div id="topBarang"></div>
-
 </div>
 
 <div class="card">
 <canvas id="chartSales"></canvas>
 </div>
 
+<div class="card">
 <h3>Tanggal & Waktu</h3>
-
 <div id="timeNow"></div>
+</div>
+
+<div class="card">
+<h3>Total Penjualan Hari Ini</h3>
+<div id="salesToday">0</div>
+</div>
+
+<div class="card">
+<h3>Total Keuntungan Hari Ini</h3>
+<div id="profitToday">0</div>
+</div>
+
+<div class="card">
+<h3>Persentase Keuntungan</h3>
+<div id="profitPercent">0%</div>
+</div>
+
+<div class="card">
+<h3>Alert Stok Minimum</h3>
+<div id="alertStock"></div>
+</div>
 
 </div>
 
@@ -186,6 +206,7 @@ margin-top:10px;
 </div>
 
 </div>
+
 
 <!-- INVENTORY -->
 
@@ -239,6 +260,8 @@ margin-top:10px;
 
 </div>
 
+<input id="searchInventory" placeholder="Cari barang inventory..."> 
+  
 <table>
 
 <thead>
@@ -257,8 +280,10 @@ margin-top:10px;
 </tr>
 
 </thead>
-
+ 
+  
 <tbody id="inventoryTable"></tbody>
+
 
 </table>
 
@@ -408,14 +433,13 @@ margin-top:10px;
 
 </div>
 
-<div id="kasir" class="section">
-
 <div id="reader"></div>
 
 <script src="app.js"></script>
 
 </body>
 </html>
+
 
 
 
