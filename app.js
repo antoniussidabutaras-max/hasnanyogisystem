@@ -100,13 +100,25 @@ let html=""
 
 inventory.forEach((b,i)=>{
 
+let jumlahBarcode = b.barcodes ? b.barcodes.length : 0
+
 html+=`
 
 <tr>
 
-<td>${b.nama}</td>
+<td onclick="detailBarang(${i})" style="cursor:pointer;color:blue">
+${b.nama}
+</td>
+
 <td>${b.kategori}</td>
+
 <td>${b.satuan}</td>
+
+<td>
+<button onclick="lihatBarcode(${i})">
+${jumlahBarcode} barcode
+</button>
+</td>
 
 <td>${b.modal}</td>
 <td>${b.jual}</td>
@@ -830,3 +842,53 @@ localStorage.setItem("inventory",JSON.stringify(inventory))
 }
 
 }
+
+function lihatBarcode(i){
+
+let b = inventory[i]
+
+let list=""
+
+b.barcodes.forEach(bar=>{
+list += bar+"\n"
+})
+
+let newBarcode = prompt(
+"List Barcode Produk :\n\n"+list+"\nTambah barcode baru:"
+)
+
+if(newBarcode){
+
+b.barcodes.push(newBarcode)
+
+localStorage.setItem("inventory",JSON.stringify(inventory))
+
+renderInventory()
+
+}
+
+}
+
+function detailBarang(i){
+
+let b = inventory[i]
+
+let text=""
+
+text += "Nama : "+b.nama+"\n"
+text += "Kategori : "+b.kategori+"\n"
+text += "Satuan : "+b.satuan+"\n"
+text += "Modal : "+b.modal+"\n"
+text += "Jual : "+b.jual+"\n"
+text += "Stok : "+b.stok+"\n\n"
+
+text += "BARCODE\n"
+
+b.barcodes.forEach(bar=>{
+text += bar+"\n"
+})
+
+alert(text)
+
+}
+
