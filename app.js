@@ -40,11 +40,13 @@ now.toLocaleDateString()+" "+now.toLocaleTimeString()
 
 function saveBarang(){
 
-let barang = {
+let barcodes=[]
 
-barcode1:inv_barcode1.value,
-barcode2:inv_barcode2.value,
-barcode3:inv_barcode3.value,
+if(inv_barcode1.value) barcodes.push(inv_barcode1.value)
+if(inv_barcode2.value) barcodes.push(inv_barcode2.value)
+if(inv_barcode3.value) barcodes.push(inv_barcode3.value)
+
+let barang={
 
 nama:inv_nama.value,
 kategori:inv_kategori.value,
@@ -54,7 +56,9 @@ modal:Number(inv_modal.value),
 jual:Number(inv_jual.value),
 
 stok:Number(inv_stok.value),
-minstok:Number(inv_minstok.value)
+minstok:Number(inv_minstok.value),
+
+barcodes:barcodes
 
 }
 
@@ -174,20 +178,8 @@ alertStock.innerHTML=alert
 function addCart(){
 
 let barcode = kasir_barcode.value
-let qty = Number(kasir_qty.value)
 
-if(!qty || qty<=0){
-
-alert("Qty tidak valid")
-return
-
-}
-
-let barang = inventory.find(b=>
-b.barcode1==barcode ||
-b.barcode2==barcode ||
-b.barcode3==barcode
-)
+let barang = cariBarang(barcode)
 
 if(!barang){
 
@@ -196,14 +188,19 @@ return
 
 }
 
+let qty = Number(kasir_qty.value)
+
 cart.push({
 
 barcode:barcode,
 nama:barang.nama,
 satuan:barang.satuan,
-qty:qty,
+
 modal:barang.modal,
-jual:barang.jual
+jual:barang.jual,
+
+qty:qty,
+barcodes:barang.barcodes
 
 })
 
@@ -795,5 +792,35 @@ csv+=`${h.nama},${h.total},${h.sisa}\n`
 })
 
 downloadCSV(csv,"hutang.csv")
+
+}
+
+function showBarcode(i){
+
+let c = cart[i]
+
+let list=""
+
+c.barcodes.forEach(b=>{
+
+list += b+"\n"
+
+})
+
+let newBarcode = prompt(
+"List Barcode Produk :\n\n"+list+"\nTambah barcode baru:"
+)
+
+if(newBarcode){
+
+c.barcodes.push(newBarcode)
+
+let barang = inventory.find(b=>b.nama==c.nama)
+
+barang.barcodes.push(newBarcode)
+
+localStorage.setItem("inventory",JSON.stringify(inventory))
+
+}
 
 }
