@@ -525,16 +525,6 @@ autoIsiBarang(barcode)
 
 }
 
-scanInput.addEventListener("change",()=>{
-
-let code = scanInput.value
-
-tambahKeCart(code)
-
-scanInput.value=""
-
-})
-
 // ==========================
 // AUTO ISI BARANG
 // ==========================
