@@ -347,18 +347,31 @@ margin-top:10px;
 
 <div class="card">
 
-<h3>Pembayaran</h3>
+<h3>Keranjang Belanja</h3>
 
-<div>Total Bayar : <span id="totalBayar">0</span></div>
+<table width="100%">
 
-<input id="uangBayar" placeholder="Uang Dibayar">
+<thead>
 
-<div>Kembalian : <span id="kembalian">0</span></div>
+<tr>
+<th>Barang</th>
+<th>Harga</th>
+<th>Qty</th>
+<th>Total</th>
+<th>Aksi</th>
+</tr>
 
-<button class="action" onclick="bayar()">Bayar</button>
+</thead>
+
+<tbody id="cartTable"></tbody>
+
+</table>
+
+<h3>Total : Rp <span id="cartTotal">0</span></h3>
+
+<button onclick="checkout()">Checkout</button>
 
 </div>
-
 </div>
 
 <!-- LAPORAN -->
@@ -435,6 +448,7 @@ margin-top:10px;
 
 </body>
 </html>
+
 
 
 
