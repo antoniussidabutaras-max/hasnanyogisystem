@@ -1099,55 +1099,11 @@ renderGrafik()
 
 })
 
-function show(page){
-
-const content = document.getElementById("content")
-
-if(page === "dashboard"){
-content.innerHTML = "<h2>Dashboard</h2>"
-}
-
-if(page === "produk"){
-content.innerHTML = "<h2>Produk</h2>"
-}
-
-if(page === "kasir"){
-content.innerHTML = "<h2>Kasir</h2>"
-}
-
-if(page === "laporan"){
-content.innerHTML = "<h2>Laporan</h2>"
-}
-
-}
-
-let produk = JSON.parse(localStorage.getItem("produk")) || [];
-
-function tambahProduk(){
-  const nama = prompt("Nama produk");
-  const harga = prompt("Harga");
-
-  produk.push({nama, harga});
-  localStorage.setItem("produk", JSON.stringify(produk));
-
-  tampilProduk();
-}
-
-function tampilProduk(){
-  const list = document.getElementById("listProduk");
-  if(!list) return;
-
-  list.innerHTML = "";
-
-  produk.forEach(p=>{
-    list.innerHTML += `<p>${p.nama} - Rp${p.harga}</p>`;
-  });
-}
-
 </script>
 
 </body>
 </html>
+
 
 
 
