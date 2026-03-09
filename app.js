@@ -228,31 +228,35 @@ renderCart()
 function renderCart(){
 
 let html=""
-
-let totalModal=0
-let totalJual=0
+let total=0
 
 cart.forEach((c,i)=>{
 
 let sub=c.qty*c.jual
-
-totalModal+=c.qty*c.modal
-totalJual+=sub
+total+=sub
 
 html+=`
 
 <tr>
 
-<td>${c.barcode}</td>
-<td onclick="showBarcode(${i})" style="cursor:pointer;color:blue">
+<td>
+<span style="cursor:pointer;color:blue"
+onclick="showBarcode(${i})">
 ${c.nama}
+</span>
 </td>
-<td>${c.satuan}</td>
 
-<td>${c.qty}</td>
-
-<td>${c.modal}</td>
 <td>${c.jual}</td>
+
+<td>
+
+<button onclick="minusQty(${i})">-</button>
+
+${c.qty}
+
+<button onclick="plusQty(${i})">+</button>
+
+</td>
 
 <td>${sub}</td>
 
@@ -267,6 +271,11 @@ ${c.nama}
 `
 
 })
+
+cartTable.innerHTML=html
+cartTotal.innerText=total
+
+}
 
 cartTable.innerHTML=html
 
@@ -516,22 +525,42 @@ autoIsiBarang(barcode)
 
 }
 
+scanInput.addEventListener("change",()=>{
+
+let code = scanInput.value
+
+tambahKeCart(code)
+
+scanInput.value=""
+
+})
+
 // ==========================
 // AUTO ISI BARANG
 // ==========================
 
 function autoIsiBarang(barcode){
 
-let barang = inventory.find(b =>
-b.barcodes && b.barcodes.includes(barcode)
-)
+let existing = cart.find(c=>c.nama==barang.nama)
 
-if(barang){
+if(existing){
 
-kasir_nama.value = barang.nama
-kasir_satuan.value = barang.satuan
+existing.qty++
+
+}else{
+
+cart.push({
+
+nama:barang.nama,
+jual:barang.jual,
+modal:barang.modal,
+qty:1
+
+})
 
 }
+
+renderCart()
 
 }
 
@@ -1027,5 +1056,51 @@ transaksi.push(data)
 renderCart()
 renderInventory()
 renderDashboard()
+
+}
+
+function plusQty(i){
+
+cart[i].qty++
+
+renderCart()
+
+}
+
+function minusQty(i){
+
+cart[i].qty--
+
+if(cart[i].qty<=0){
+
+cart.splice(i,1)
+
+}
+
+renderCart()
+
+}
+
+function showBarcode(i){
+
+let nama=cart[i].nama
+
+let barang=inventory.find(b=>b.nama==nama)
+
+let list=barang.barcodes.join("\n")
+
+let tambah=prompt(
+
+"List barcode:\n\n"+list+"\n\nTambah barcode baru?"
+
+)
+
+if(tambah){
+
+barang.barcodes.push(tambah)
+
+saveInventory()
+
+}
 
 }
