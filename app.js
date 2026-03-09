@@ -112,6 +112,7 @@ html+=`
 
 <td>
 
+<button onclick="editBarang(${i})">Edit</button>
 <button onclick="hapusBarang(${i})">Hapus</button>
 
 </td>
