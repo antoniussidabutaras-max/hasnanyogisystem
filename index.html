@@ -520,6 +520,11 @@ inv_barcode3.value.trim(),
 inv_barcode4.value.trim()
 ].filter(b=>b)
 
+if(barcodes.length===0){
+alert("Minimal 1 barcode harus diisi")
+return
+}
+
 let nama=inv_nama.value.trim()
 
 if(!nama){
@@ -760,6 +765,7 @@ dashboardUpdate()
 
 </body>
 </html>
+
 
 
 
