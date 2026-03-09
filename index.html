@@ -135,19 +135,17 @@ margin-top:10px;
 
 <!-- DASHBOARD -->
 
+<div id="dashboard" class="section">
+
 <div class="card">
-
 <h3>Barang Paling Laku</h3>
-
 <div id="topBarang"></div>
 
 </div>
 
-<canvas id="chartSales"></canvas>
-
-<div id="dashboard" class="section">
-
 <div class="card">
+<canvas id="chartSales"></canvas>
+</div>
 
 <h3>Tanggal & Waktu</h3>
 
@@ -224,13 +222,10 @@ margin-top:10px;
 
 </select>
 
-<input id="inv_modal" placeholder="Harga Modal">
-
-<input id="inv_jual" placeholder="Harga Jual">
-
-<input id="inv_stok" placeholder="Jumlah Stok">
-
-<input id="inv_minstok" placeholder="Minimum Stok">
+<input id="inv_modal" type="number" placeholder="Harga Modal">
+<input id="inv_jual" type="number" placeholder="Harga Jual">
+<input id="inv_stok" type="number" placeholder="Jumlah Stok">
+<input id="inv_minstok" type="number" placeholder="Minimum Stok">
 
 <button class="action" onclick="saveBarang()">Simpan Barang</button>
 <button class="red" onclick="resetInventoryForm()">Reset</button>
@@ -292,8 +287,8 @@ margin-top:10px;
 
 </select>
 
-<input id="kasir_qty" placeholder="Qty" value="1">
-
+<input id="kasir_qty" type="number" value="1">
+  
 <button class="action" onclick="addCart()">Tambah</button>
 <button class="red" onclick="resetCart()">Reset</button>
 
@@ -413,12 +408,15 @@ margin-top:10px;
 
 </div>
 
+<div id="kasir" class="section">
+
 <div id="reader"></div>
 
 <script src="app.js"></script>
 
 </body>
 </html>
+
 
 
 
