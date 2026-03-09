@@ -231,7 +231,9 @@ html+=`
 <tr>
 
 <td>${c.barcode}</td>
-<td>${c.nama}</td>
+<td onclick="showBarcode(${i})" style="cursor:pointer;color:blue">
+${c.nama}
+</td>
 <td>${c.satuan}</td>
 
 <td>${c.qty}</td>
@@ -331,10 +333,8 @@ jual:c.jual
 
 // kurangi stok
 
-let barang=inventory.find(b=>
-b.barcode1==c.barcode ||
-b.barcode2==c.barcode ||
-b.barcode3==c.barcode
+let barang = inventory.find(b =>
+b.barcodes && b.barcodes.includes(c.barcode)
 )
 
 if(barang){
@@ -508,10 +508,8 @@ autoIsiBarang(barcode)
 
 function autoIsiBarang(barcode){
 
-let barang = inventory.find(b=>
-b.barcode1==barcode ||
-b.barcode2==barcode ||
-b.barcode3==barcode
+let barang = inventory.find(b =>
+b.barcodes && b.barcodes.includes(barcode)
 )
 
 if(barang){
@@ -651,6 +649,14 @@ barcode=>{
 kasir_barcode.value = barcode
 
 autoIsiBarang(barcode)
+
+function cariBarang(barcode){
+
+return inventory.find(b => 
+b.barcodes && b.barcodes.includes(barcode)
+)
+
+}
 
 addCart()
 
