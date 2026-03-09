@@ -184,6 +184,15 @@ alertStock.innerHTML=alert
 
 }
 
+function cariBarang(barcode){
+
+return inventory.find(b => 
+b.barcodes && b.barcodes.includes(barcode)
+)
+
+}
+
+
 // ==========================
 // ADD CART
 // ==========================
@@ -276,16 +285,6 @@ cartTable.innerHTML=html
 cartTotal.innerText=total
 
 }
-
-cartTable.innerHTML=html
-
-totalModalEl = document.getElementById("totalModal")
-totalJualEl = document.getElementById("totalJual")
-totalBayarEl = document.getElementById("totalBayar")
-
-totalModalEl.innerText=totalModal
-totalJualEl.innerText=totalJual
-totalBayarEl.innerText=totalJual
 
 }
 
@@ -531,6 +530,12 @@ autoIsiBarang(barcode)
 
 function autoIsiBarang(barcode){
 
+let barang = cariBarang(barcode)
+
+if(!barang){
+return
+}
+
 let existing = cart.find(c=>c.nama==barang.nama)
 
 if(existing){
@@ -541,10 +546,13 @@ existing.qty++
 
 cart.push({
 
+barcode:barcode,
 nama:barang.nama,
-jual:barang.jual,
+satuan:barang.satuan,
 modal:barang.modal,
-qty:1
+jual:barang.jual,
+qty:1,
+barcodes:barang.barcodes
 
 })
 
@@ -683,13 +691,6 @@ kasir_barcode.value = barcode
 
 autoIsiBarang(barcode)
 
-function cariBarang(barcode){
-
-return inventory.find(b => 
-b.barcodes && b.barcodes.includes(barcode)
-)
-
-}
 
 addCart()
 
@@ -702,9 +703,9 @@ function editBarang(i){
 
 let b = inventory[i]
 
-inv_barcode1.value = b.barcode1
-inv_barcode2.value = b.barcode2
-inv_barcode3.value = b.barcode3
+inv_barcode1.value = b.barcodes[0] || ""
+inv_barcode2.value = b.barcodes[1] || ""
+inv_barcode3.value = b.barcodes[2] || ""
 
 inv_nama.value = b.nama
 inv_kategori.value = b.kategori
@@ -834,18 +835,6 @@ downloadCSV(csv,"hutang.csv")
 
 }
 
-function showBarcode(i){
-
-let c = cart[i]
-
-let list=""
-
-c.barcodes.forEach(b=>{
-
-list += b+"\n"
-
-})
-
 let newBarcode = prompt(
 "List Barcode Produk :\n\n"+list+"\nTambah barcode baru:"
 )
@@ -958,18 +947,13 @@ let items=0
 
 let today=new Date().toLocaleDateString()
 
-transaksi.forEach(t=>{
+laporan.forEach(l=>{
 
-if(t.tanggal==today){
+if(l.tanggal==today){
 
-sales+=t.total
-
-t.items.forEach(i=>{
-
-items+=i.qty
-profit+= (i.jual - i.modal) * i.qty
-
-})
+sales += l.jual*l.qty
+profit += (l.jual-l.modal)*l.qty
+items += l.qty
 
 }
 
@@ -978,7 +962,9 @@ profit+= (i.jual - i.modal) * i.qty
 salesToday.innerText=sales
 profitToday.innerText=profit
 itemSold.innerText=items
-totalTransaksi.innerText=transaksi.length
+totalTransaksi.innerText=laporan.length
+
+}
 
 renderTopBarang()
 renderAlertStock()
