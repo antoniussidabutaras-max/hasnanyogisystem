@@ -525,3 +525,23 @@ kasir_satuan.value = barang.satuan
 }
 
 }
+
+searchBarang?.addEventListener("input",()=>{
+
+let key = searchBarang.value.toLowerCase()
+
+let hasil = inventory.filter(b=>
+b.nama.toLowerCase().includes(key)
+)
+
+let list=""
+
+hasil.forEach(b=>{
+
+list += b.nama + " - " + b.jual + "\n"
+
+})
+
+alert(list)
+
+})
