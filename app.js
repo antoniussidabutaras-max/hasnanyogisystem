@@ -626,3 +626,162 @@ a.download=file
 a.click()
 
 }
+
+// ==========================
+// AUTO SCAN BARCODE
+// ==========================
+
+let autoScanner
+
+function startAutoScan(){
+
+if(autoScanner){
+
+autoScanner.stop()
+
+}
+
+autoScanner = new Html5Qrcode("reader")
+
+autoScanner.start(
+{ facingMode:"environment" },
+{
+fps:15,
+qrbox:250
+},
+barcode=>{
+
+kasir_barcode.value = barcode
+
+autoIsiBarang(barcode)
+
+addCart()
+
+}
+)
+
+}
+
+function editBarang(i){
+
+let b = inventory[i]
+
+inv_barcode1.value = b.barcode1
+inv_barcode2.value = b.barcode2
+inv_barcode3.value = b.barcode3
+
+inv_nama.value = b.nama
+inv_kategori.value = b.kategori
+inv_satuan.value = b.satuan
+
+inv_modal.value = b.modal
+inv_jual.value = b.jual
+
+inv_stok.value = b.stok
+inv_minstok.value = b.minstok
+
+inventory.splice(i,1)
+
+}
+
+function loadTopBarang(){
+
+let data = {}
+
+laporan.forEach(l=>{
+
+if(!data[l.nama]){
+
+data[l.nama]=0
+
+}
+
+data[l.nama]+=l.qty
+
+})
+
+let ranking = Object.entries(data)
+.sort((a,b)=>b[1]-a[1])
+.slice(0,5)
+
+let html=""
+
+ranking.forEach(r=>{
+
+html+= r[0]+" : "+r[1]+" terjual<br>"
+
+})
+
+topBarang.innerHTML=html
+
+}
+
+loadTopBarang()
+
+function loadProfit(){
+
+let today = new Date().toLocaleDateString()
+
+let modal=0
+let jual=0
+
+laporan.forEach(l=>{
+
+if(l.tanggal==today){
+
+modal += l.modal*l.qty
+jual += l.jual*l.qty
+
+}
+
+})
+
+salesToday.innerText = jual
+
+profitToday.innerText = jual-modal
+
+profitPercent.innerText =
+Math.round(((jual-modal)/jual)*100)+"%"
+
+}
+
+loadProfit()
+
+// ==========================
+// AUTO BACKUP
+// ==========================
+
+setInterval(()=>{
+
+let backup={
+
+inventory:inventory,
+laporan:laporan,
+hutang:hutang
+
+}
+
+localStorage.setItem("backup",JSON.stringify(backup))
+
+},60000)
+
+function prediksiRestok(){
+
+let rekomendasi=""
+
+inventory.forEach(b=>{
+
+if(b.stok <= b.minstok){
+
+rekomendasi +=
+"Segera restok : "+b.nama+"<br>"
+
+}
+
+})
+
+alertStock.innerHTML = rekomendasi
+
+}
+
+prediksiRestok()
