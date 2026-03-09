@@ -147,6 +147,7 @@ checkMinStock()
 
 renderInventory()
 
+
 // ==========================
 // DELETE BARANG
 // ==========================
@@ -361,6 +362,7 @@ localStorage.setItem("laporan",JSON.stringify(laporan))
 localStorage.setItem("inventory",JSON.stringify(inventory))
 
 renderInventory()
+renderDashboard()
 renderLaporan()
 
 resetCart()
@@ -928,3 +930,102 @@ html+=`
 inventoryTable.innerHTML=html
 
 })
+
+function renderDashboard(){
+
+let sales=0
+let profit=0
+let items=0
+
+let today=new Date().toLocaleDateString()
+
+transaksi.forEach(t=>{
+
+if(t.tanggal==today){
+
+sales+=t.total
+
+t.items.forEach(i=>{
+
+items+=i.qty
+profit+= (i.jual - i.modal) * i.qty
+
+})
+
+}
+
+})
+
+salesToday.innerText=sales
+profitToday.innerText=profit
+itemSold.innerText=items
+totalTransaksi.innerText=transaksi.length
+
+renderTopBarang()
+renderAlertStock()
+
+}
+
+function renderTopBarang(){
+
+let count={}
+
+transaksi.forEach(t=>{
+
+t.items.forEach(i=>{
+
+count[i.nama]=(count[i.nama]||0)+i.qty
+
+})
+
+})
+
+let sorted=Object.entries(count)
+.sort((a,b)=>b[1]-a[1])
+.slice(0,5)
+
+let html=""
+
+sorted.forEach(b=>{
+
+html+=`<div>${b[0]} - ${b[1]} pcs</div>`
+
+})
+
+topBarang.innerHTML=html
+
+}
+
+function renderAlertStock(){
+
+let html=""
+
+inventory
+.filter(b=>b.stok<=b.minstok)
+.forEach(b=>{
+
+html+=`<div style="color:red">${b.nama} stok ${b.stok}</div>`
+
+})
+
+alertStock.innerHTML=html || "Stok Aman"
+
+}
+
+setInterval(()=>{
+
+let now=new Date()
+
+timeNow.innerText=now.toLocaleString()
+
+},1000)
+
+function selesaiTransaksi(){
+
+transaksi.push(data)
+
+renderCart()
+renderInventory()
+renderDashboard()
+
+}
