@@ -438,3 +438,90 @@ localStorage.removeItem("hutang")
 }
 
 // ==========================
+
+// ==========================
+// BARCODE SCANNER
+// ==========================
+
+let scanner
+
+function scanInventory(){
+
+if(scanner){
+
+scanner.stop()
+
+}
+
+scanner = new Html5Qrcode("reader")
+
+scanner.start(
+{ facingMode: "environment" },
+{
+fps:10,
+qrbox:250
+},
+barcode => {
+
+inv_barcode1.value = barcode
+
+scanner.stop()
+
+}
+)
+
+}
+
+// ==========================
+// SCAN KASIR
+// ==========================
+
+function scanKasir(){
+
+if(scanner){
+
+scanner.stop()
+
+}
+
+scanner = new Html5Qrcode("reader")
+
+scanner.start(
+{ facingMode: "environment" },
+{
+fps:10,
+qrbox:250
+},
+barcode => {
+
+kasir_barcode.value = barcode
+
+scanner.stop()
+
+autoIsiBarang(barcode)
+
+}
+)
+
+}
+
+// ==========================
+// AUTO ISI BARANG
+// ==========================
+
+function autoIsiBarang(barcode){
+
+let barang = inventory.find(b=>
+b.barcode1==barcode ||
+b.barcode2==barcode ||
+b.barcode3==barcode
+)
+
+if(barang){
+
+kasir_nama.value = barang.nama
+kasir_satuan.value = barang.satuan
+
+}
+
+}
