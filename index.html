@@ -385,6 +385,24 @@ Total Untung: <span id="totalUntung"></span>
 
 <script>
 
+const inv_barcode = document.getElementById("inv_barcode")
+const inv_barcode2 = document.getElementById("inv_barcode2")
+const inv_barcode3 = document.getElementById("inv_barcode3")
+const inv_barcode4 = document.getElementById("inv_barcode4")
+
+const inv_nama = document.getElementById("inv_nama")
+const inv_modal = document.getElementById("inv_modal")
+const inv_jual = document.getElementById("inv_jual")
+const inv_stok = document.getElementById("inv_stok")
+
+const scanBarcode = document.getElementById("scanBarcode")
+const qtyKasir = document.getElementById("qtyKasir")
+
+const diskon = document.getElementById("diskon")
+const bayar = document.getElementById("bayar")
+
+const cartTotal = document.getElementById("cartTotal")
+
 const DB = {
 inventory: JSON.parse(localStorage.getItem("inventory")) || [],
 transaksi: JSON.parse(localStorage.getItem("transaksi")) || [],
@@ -742,6 +760,7 @@ dashboardUpdate()
 
 </body>
 </html>
+
 
 
 
