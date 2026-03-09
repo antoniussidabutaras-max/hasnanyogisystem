@@ -3,9 +3,9 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>TOKO Sembako Hasna & Yogi</title>
+<title>TOKO SEMBAKO HASNA & YOGI</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
@@ -15,7 +15,7 @@
 body{
 font-family:Arial;
 margin:0;
-background:#f1f3f6;
+background:#f4f6f8;
 }
 
 header{
@@ -24,6 +24,7 @@ color:white;
 padding:15px;
 text-align:center;
 font-size:20px;
+font-weight:bold;
 }
 
 nav{
@@ -54,14 +55,14 @@ padding:15px;
 background:white;
 padding:15px;
 margin-bottom:15px;
-border-radius:5px;
+border-radius:6px;
 box-shadow:0 2px 4px rgba(0,0,0,0.1);
 }
 
 input,select{
 width:100%;
 padding:8px;
-margin:5px 0;
+margin:4px 0;
 box-sizing:border-box;
 }
 
@@ -76,6 +77,10 @@ cursor:pointer;
 
 button.red{
 background:#e74c3c;
+color:white;
+border:none;
+padding:10px;
+cursor:pointer;
 }
 
 table{
@@ -107,60 +112,74 @@ font-weight:bold;
 
 #reader{
 width:100%;
-}
-
-@media(max-width:600px){
-
-table{
-font-size:10px;
-}
-
-nav button{
-font-size:11px;
-}
-
+margin-top:10px;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<header>TOKO Sembako Hasna & Yogi</header>
+<header>TOKO SEMBAKO HASNA & YOGI</header>
 
 <nav>
-<button onclick="show('dashboard')">Dashboard</button>
-<button onclick="show('inventory')">Inventory</button>
-<button onclick="show('kasir')">Kasir</button>
-<button onclick="show('hutang')">Hutang</button>
-<button onclick="show('laporan')">Laporan</button>
-<button onclick="show('grafik')">Grafik</button>
-<button onclick="show('backup')">Backup</button>
+
+<button onclick="showPage('dashboard')">Dashboard</button>
+<button onclick="showPage('inventory')">Inventory</button>
+<button onclick="showPage('kasir')">Kasir</button>
+<button onclick="showPage('laporan')">Laporan</button>
+<button onclick="showPage('hutang')">Hutang</button>
+
 </nav>
+
+<!-- DASHBOARD -->
 
 <div id="dashboard" class="section">
 
 <div class="card">
-<h3>Waktu</h3>
-<div id="time"></div>
+
+<h3>Tanggal & Waktu</h3>
+
+<div id="timeNow"></div>
+
 </div>
 
 <div class="card">
-<h3>Penjualan Hari Ini</h3>
-<div id="salesToday"></div>
+
+<h3>Total Penjualan Hari Ini</h3>
+
+<div id="salesToday">0</div>
+
 </div>
 
 <div class="card">
-<h3>Untung Hari Ini</h3>
-<div id="profitToday"></div>
+
+<h3>Total Keuntungan Hari Ini</h3>
+
+<div id="profitToday">0</div>
+
 </div>
 
 <div class="card">
-<h3>Alert Stok</h3>
+
+<h3>Persentase Keuntungan</h3>
+
+<div id="profitPercent">0%</div>
+
+</div>
+
+<div class="card">
+
+<h3>Alert Stok Minimum</h3>
+
 <div id="alertStock"></div>
+
 </div>
 
 </div>
+
+<!-- INVENTORY -->
 
 <div id="inventory" class="section">
 
@@ -168,51 +187,50 @@ font-size:11px;
 
 <h3>Input Barang</h3>
 
-<input id="inv_barcode" placeholder="Barcode utama">
+<input id="inv_barcode1" placeholder="Barcode utama">
+<input id="inv_barcode2" placeholder="Barcode tambahan">
+<input id="inv_barcode3" placeholder="Barcode tambahan">
 
-<input id="inv_barcode2" placeholder="Barcode tambahan (opsional)">
-<input id="inv_barcode3" placeholder="Barcode tambahan (opsional)">
-<input id="inv_barcode4" placeholder="Barcode tambahan (opsional)">
-
-<button class="action" onclick="startScan()">Scan Kamera</button>
+<button class="action" onclick="scanInventory()">Scan Barcode Kamera</button>
 
 <input id="inv_nama" placeholder="Nama Barang">
 
 <select id="inv_kategori">
 
 <option>Rokok</option>
-<option>Beras</option>
-<option>Gula</option>
-<option>Minyak</option>
+<option>Sembako</option>
 <option>Mie Instan</option>
-<option>Gas LPG</option>
-<option>Air Mineral</option>
 <option>Bumbu Dapur</option>
-<option>Lainnya</option>
+<option>Minuman</option>
 
 </select>
 
 <select id="inv_satuan">
+
 <option>pcs</option>
 <option>kg</option>
-<option>ons</option>
 <option>meter</option>
+<option>ons</option>
+
 </select>
 
 <input id="inv_modal" placeholder="Harga Modal">
 
 <input id="inv_jual" placeholder="Harga Jual">
 
-<input id="inv_stok" placeholder="Stok">
+<input id="inv_stok" placeholder="Jumlah Stok">
 
-<button class="action" onclick="saveBarang()">Simpan</button>
+<input id="inv_minstok" placeholder="Minimum Stok">
+
+<button class="action" onclick="saveBarang()">Simpan Barang</button>
+<button class="red" onclick="resetInventoryForm()">Reset</button>
 
 </div>
 
 <div class="card">
 
 <button onclick="exportInventory()">Export Excel</button>
-<button class="red" onclick="resetInventory()">Reset</button>
+<button class="red" onclick="resetInventory()">Reset Inventory</button>
 
 </div>
 
@@ -221,14 +239,16 @@ font-size:11px;
 <thead>
 
 <tr>
-<th>Barcode</th>
+
 <th>Nama</th>
 <th>Kategori</th>
 <th>Satuan</th>
 <th>Modal</th>
 <th>Jual</th>
 <th>Stok</th>
+<th>Min</th>
 <th>Aksi</th>
+
 </tr>
 
 </thead>
@@ -239,19 +259,31 @@ font-size:11px;
 
 </div>
 
+<!-- KASIR -->
+
 <div id="kasir" class="section">
 
 <div class="card">
 
-<input id="scanBarcode" placeholder="Scan Barcode">
+<input id="kasir_barcode" placeholder="Scan Barcode">
 
-<button onclick="startScanKasir()">Scan Kamera</button>
+<button onclick="scanKasir()">Scan Kamera</button>
 
-<input id="searchNama" placeholder="Cari Nama Barang">
+<input id="kasir_nama" placeholder="Nama Barang Manual">
 
-<input id="qtyKasir" placeholder="Qty" value="1">
+<select id="kasir_satuan">
 
-<button class="action" onclick="tambahKasir()">Tambah</button>
+<option>pcs</option>
+<option>kg</option>
+<option>meter</option>
+<option>ons</option>
+
+</select>
+
+<input id="kasir_qty" placeholder="Qty" value="1">
+
+<button class="action" onclick="addCart()">Tambah</button>
+<button class="red" onclick="resetCart()">Reset</button>
 
 </div>
 
@@ -260,11 +292,16 @@ font-size:11px;
 <thead>
 
 <tr>
+
+<th>Barcode</th>
 <th>Nama</th>
-<th>Qty</th>
 <th>Satuan</th>
-<th>Harga</th>
+<th>Qty</th>
+<th>Modal</th>
+<th>Jual</th>
 <th>Subtotal</th>
+<th>Aksi</th>
+
 </tr>
 
 </thead>
@@ -273,25 +310,66 @@ font-size:11px;
 
 </table>
 
-<div class="totalBox">
+<div class="card">
 
-Total: <span id="cartTotal">0</span>
+<div>Total Modal : <span id="totalModal">0</span></div>
+<div>Total Jual : <span id="totalJual">0</span></div>
 
 </div>
 
 <div class="card">
 
-<input id="diskon" placeholder="Diskon %">
+<h3>Pembayaran</h3>
 
-<input id="bayar" placeholder="Uang Dibayar">
+<div>Total Bayar : <span id="totalBayar">0</span></div>
 
-<div>Kembalian: <span id="kembalian"></span></div>
+<input id="uangBayar" placeholder="Uang Dibayar">
+
+<div>Kembalian : <span id="kembalian">0</span></div>
 
 <button class="action" onclick="bayar()">Bayar</button>
 
 </div>
 
 </div>
+
+<!-- LAPORAN -->
+
+<div id="laporan" class="section">
+
+<div class="card">
+
+<button onclick="exportLaporan()">Export Excel</button>
+<button class="red" onclick="resetLaporan()">Reset</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Tanggal</th>
+<th>Jam</th>
+<th>Barcode</th>
+<th>Nama</th>
+<th>Satuan</th>
+<th>Qty</th>
+<th>Modal</th>
+<th>Jual</th>
+
+</tr>
+
+</thead>
+
+<tbody id="laporanTable"></tbody>
+
+</table>
+
+</div>
+
+<!-- HUTANG -->
 
 <div id="hutang" class="section">
 
@@ -307,11 +385,12 @@ Total: <span id="cartTotal">0</span>
 <thead>
 
 <tr>
+
 <th>Nama</th>
-<th>Tanggal</th>
-<th>Total</th>
-<th>Dibayar</th>
-<th>Sisa</th>
+<th>Total Hutang</th>
+<th>Sisa Hutang</th>
+<th>Aksi</th>
+
 </tr>
 
 </thead>
@@ -322,460 +401,9 @@ Total: <span id="cartTotal">0</span>
 
 </div>
 
-<div id="laporan" class="section">
-
-<div class="card">
-
-<input type="date" id="filterTanggal">
-
-<button onclick="filterLaporan()">Filter</button>
-
-<button onclick="exportLaporan()">Export Excel</button>
-<button class="red" onclick="resetLaporan()">Reset</button>
-
-</div>
-
-<table>
-
-<thead>
-
-<tr>
-<th>Tanggal</th>
-<th>Jam</th>
-<th>Barcode</th>
-<th>Nama</th>
-<th>Qty</th>
-<th>Satuan</th>
-<th>Modal</th>
-<th>Jual</th>
-<th>Untung</th>
-</tr>
-
-</thead>
-
-<tbody id="laporanTable"></tbody>
-
-</table>
-
-<div class="card">
-
-Total Modal: <span id="totalModal"></span><br>
-Total Penjualan: <span id="totalJual"></span><br>
-Total Untung: <span id="totalUntung"></span>
-
-</div>
-
-</div>
-
-<div id="grafik" class="section">
-
-<canvas id="chartSales"></canvas>
-
-</div>
-
-<div id="backup" class="section">
-
-<button onclick="backupData()">Export Backup</button>
-
-<input type="file" onchange="importData(event)">
-
-</div>
-
 <div id="reader"></div>
 
-<script>
-
-const inv_barcode = document.getElementById("inv_barcode")
-const inv_barcode2 = document.getElementById("inv_barcode2")
-const inv_barcode3 = document.getElementById("inv_barcode3")
-const inv_barcode4 = document.getElementById("inv_barcode4")
-
-const inv_nama = document.getElementById("inv_nama")
-const inv_modal = document.getElementById("inv_modal")
-const inv_jual = document.getElementById("inv_jual")
-const inv_stok = document.getElementById("inv_stok")
-
-const scanBarcode = document.getElementById("scanBarcode")
-const qtyKasir = document.getElementById("qtyKasir")
-
-const diskon = document.getElementById("diskon")
-const bayar = document.getElementById("bayar")
-
-const cartTotal = document.getElementById("cartTotal")
-
-const DB = {
-inventory: JSON.parse(localStorage.getItem("inventory")) || [],
-transaksi: JSON.parse(localStorage.getItem("transaksi")) || [],
-hutang: JSON.parse(localStorage.getItem("hutang")) || []
-}
-
-function saveDB(){
-localStorage.setItem("inventory",JSON.stringify(DB.inventory))
-localStorage.setItem("transaksi",JSON.stringify(DB.transaksi))
-localStorage.setItem("hutang",JSON.stringify(DB.hutang))
-}
-
-let cart = []
-
-function show(id){
-
-document.querySelectorAll(".section").forEach(s=>{
-s.style.display="none"
-})
-
-let page=document.getElementById(id)
-
-if(page){
-page.style.display="block"
-}
-
-if(id==="dashboard"){
-dashboardUpdate()
-}
-
-if(id==="grafik"){
-renderGrafik()
-}
-
-}
-
-function rupiah(n){
-return "Rp "+Number(n).toLocaleString("id-ID")
-}
-
-function dashboardUpdate(){
-
-let today=new Date().toLocaleDateString()
-
-let sales=0
-let profit=0
-
-DB.transaksi.forEach(t=>{
-
-if(t.tanggal===today){
-
-sales+=t.jual*t.qty
-profit+=t.untung
-
-}
-
-})
-
-document.getElementById("salesToday").innerText=rupiah(sales)
-document.getElementById("profitToday").innerText=rupiah(profit)
-
-let alert=""
-
-DB.inventory.forEach(i=>{
-
-if(i.stok<10){
-
-alert+=`<div class="alert">${i.nama} stok ${i.stok}</div>`
-
-}
-
-})
-
-document.getElementById("alertStock").innerHTML=alert
-
-}
-
-function renderInventory(){
-
-let table=document.getElementById("inventoryTable")
-
-if(!table) return
-
-table.innerHTML=""
-
-DB.inventory.forEach((i,index)=>{
-
-table.innerHTML+=`
-
-<tr>
-<td>${i.barcodes.join(",")}</td>
-<td>${i.nama}</td>
-<td>${i.kategori}</td>
-<td>${i.satuan}</td>
-<td>${rupiah(i.modal)}</td>
-<td>${rupiah(i.jual)}</td>
-<td>${i.stok}</td>
-<td>
-<button onclick="hapusBarang(${index})">Hapus</button>
-</td>
-</tr>
-
-`
-
-})
-
-}
-
-function saveBarang(){
-
-let barcodes=[
-inv_barcode.value.trim(),
-inv_barcode2.value.trim(),
-inv_barcode3.value.trim(),
-inv_barcode4.value.trim()
-].filter(b=>b)
-
-if(barcodes.length===0){
-alert("Minimal 1 barcode harus diisi")
-return
-}
-
-let nama=inv_nama.value.trim()
-
-if(!nama){
-
-alert("Nama barang wajib")
-return
-
-}
-
-DB.inventory.push({
-
-nama:nama,
-barcodes:barcodes,
-kategori:inv_kategori.value,
-satuan:inv_satuan.value,
-modal:Number(inv_modal.value)||0,
-jual:Number(inv_jual.value)||0,
-stok:Number(inv_stok.value)||0
-
-})
-
-saveDB()
-
-renderInventory()
-
-resetFormInventory()
-
-}
-
-function hapusBarang(i){
-
-if(!confirm("Hapus barang?")) return
-
-DB.inventory.splice(i,1)
-
-saveDB()
-
-renderInventory()
-
-}
-
-function tambahKasir(){
-
-let barcode=scanBarcode.value.trim()
-
-let qty=parseInt(qtyKasir.value)||1
-
-let item=DB.inventory.find(i=>i.barcodes.includes(barcode))
-
-if(!item){
-
-alert("Barang tidak ada")
-
-return
-
-}
-
-if(item.stok<qty){
-
-alert("Stok tidak cukup")
-
-return
-
-}
-
-let exist=cart.find(c=>c.nama===item.nama)
-
-if(exist){
-
-exist.qty+=qty
-exist.subtotal=exist.qty*exist.jual
-
-}else{
-
-cart.push({
-
-barcode:barcode,
-nama:item.nama,
-satuan:item.satuan,
-modal:item.modal,
-jual:item.jual,
-qty:qty,
-subtotal:item.jual*qty
-
-})
-
-}
-
-item.stok-=qty
-
-scanBarcode.value=""
-qtyKasir.value=1
-
-renderCart()
-renderInventory()
-
-}
-
-function renderCart(){
-
-let table=document.getElementById("cartTable")
-
-if(!table) return
-
-table.innerHTML=""
-
-let total=0
-
-cart.forEach((c,i)=>{
-
-total+=c.subtotal
-
-table.innerHTML+=`
-
-<tr>
-<td>${c.nama}</td>
-<td>${c.qty}</td>
-<td>${c.satuan}</td>
-<td>${rupiah(c.jual)}</td>
-<td>${rupiah(c.subtotal)}</td>
-</tr>
-
-`
-
-})
-
-document.getElementById("cartTotal").innerText=rupiah(total)
-
-}
-
-function bayar(){
-
-if(cart.length===0){
-
-alert("Cart kosong")
-return
-
-}
-
-cart.forEach(c=>{
-
-DB.transaksi.push({
-
-tanggal:new Date().toLocaleDateString(),
-jam:new Date().toLocaleTimeString(),
-barcode:c.barcode,
-nama:c.nama,
-qty:c.qty,
-satuan:c.satuan,
-modal:c.modal,
-jual:c.jual,
-untung:(c.jual-c.modal)*c.qty
-
-})
-
-})
-
-saveDB()
-
-cart=[]
-
-renderCart()
-
-dashboardUpdate()
-
-alert("Transaksi berhasil")
-
-}
-
-function resetFormInventory(){
-
-inv_barcode.value=""
-inv_barcode2.value=""
-inv_barcode3.value=""
-inv_barcode4.value=""
-
-inv_nama.value=""
-inv_modal.value=""
-inv_jual.value=""
-inv_stok.value=""
-
-}
-
-function renderGrafik(){
-
-if(DB.transaksi.length===0) return
-
-let data={}
-
-DB.transaksi.forEach(t=>{
-
-let bulan=t.tanggal.split("/")[1]
-
-if(!data[bulan]) data[bulan]=0
-
-data[bulan]+=t.jual*t.qty
-
-})
-
-let ctx=document.getElementById("chartSales").getContext("2d")
-
-new Chart(ctx,{
-type:"bar",
-data:{
-labels:Object.keys(data),
-datasets:[{
-label:"Penjualan",
-data:Object.values(data)
-}]
-}
-})
-
-}
-
-setInterval(()=>{
-
-let time=document.getElementById("time")
-
-if(time){
-
-time.innerText=new Date().toLocaleString()
-
-}
-
-},1000)
-
-window.onload=function(){
-
-show("dashboard")
-
-renderInventory()
-
-dashboardUpdate()
-
-}
-
-</script>
+<script src="app.js"></script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
