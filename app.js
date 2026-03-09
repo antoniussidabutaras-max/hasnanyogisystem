@@ -892,3 +892,39 @@ alert(text)
 
 }
 
+searchInventory?.addEventListener("input",()=>{
+
+let key = searchInventory.value.toLowerCase()
+
+let html=""
+
+inventory
+.filter(b=>b.nama.toLowerCase().includes(key))
+.forEach((b,i)=>{
+
+html+=`
+
+<tr>
+
+<td>${b.nama}</td>
+<td>${b.kategori}</td>
+<td>${b.satuan}</td>
+<td>${b.modal}</td>
+<td>${b.jual}</td>
+<td>${b.stok}</td>
+<td>${b.minstok}</td>
+
+<td>
+<button onclick="editBarang(${i})">Edit</button>
+<button onclick="hapusBarang(${i})">Hapus</button>
+</td>
+
+</tr>
+
+`
+
+})
+
+inventoryTable.innerHTML=html
+
+})
