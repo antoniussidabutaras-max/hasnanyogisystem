@@ -1,95 +1,17 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
 <meta charset="UTF-8">
-<title>HASNA & YOGI POS</title>
+<title>Hasnanyogi POS</title>
 
-<script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-
-body{
-font-family:Arial, Helvetica, sans-serif;
-background:#f4f4f4;
-margin:0;
-}
-
-nav{
-background:#222;
-padding:10px;
-display:flex;
-gap:10px;
-}
-
-nav button{
-padding:10px 15px;
-border:none;
-background:#444;
-color:white;
-cursor:pointer;
-border-radius:5px;
-}
-
-nav button:hover{
-background:#666;
-}
-
-.section{
-display:none;
-padding:20px;
-}
-
-.card{
-background:white;
-padding:15px;
-margin-bottom:20px;
-border-radius:8px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-th,td{
-padding:8px;
-border-bottom:1px solid #ddd;
-text-align:left;
-}
-
-input{
-padding:8px;
-margin:5px;
-}
-
-.dashboard-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:15px;
-}
-
-.kasir-grid{
-display:grid;
-grid-template-columns:350px 1fr;
-gap:20px;
-}
-
-.big{
-font-size:22px;
-font-weight:bold;
-}
-
-</style>
+<link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
 
-<!-- NAVBAR -->
+<h1>Hasnanyogi POS</h1>
 
 <nav>
 
@@ -101,124 +23,41 @@ font-weight:bold;
 
 </nav>
 
-
 <!-- DASHBOARD -->
 
 <div id="dashboard" class="section">
 
 <h2>Dashboard</h2>
 
-<div class="dashboard-grid">
-
-<div class="card">
-Total Produk
-<div class="big" id="totalProduk">0</div>
-</div>
-
-<div class="card">
-Total Omzet
-<div class="big" id="omzet">0</div>
-</div>
-
-<div class="card">
-Stok Menipis
-<div class="big" id="stokMenipis">0</div>
-</div>
-
-</div>
-
-<div class="card">
-
-<h3>Waktu Sekarang</h3>
-<div id="timeNow"></div>
-
-</div>
+Total Produk : <span id="totalProduk"></span><br>
+Omzet : <span id="omzet"></span><br>
+Stok Menipis : <span id="stokMenipis"></span>
 
 </div>
 
 
 <!-- KASIR -->
 
-<div id="kasir" class="section">
+<div id="kasir" class="section" style="display:none">
 
 <h2>Kasir</h2>
 
-<div class="kasir-grid">
-
-<div>
-
-<div class="card">
-
-<h3>Scan / Cari Barang</h3>
-
-<input
-id="kasir_barcode"
-placeholder="Scan barcode / ketik nama barang"
-style="width:100%;font-size:16px"
->
-
-<button onclick="scanKasir()">Scan Kamera</button>
-
-<div id="reader"></div>
-
-</div>
-
-<div class="card">
-
-<h3>Info Barang</h3>
-
-<div id="infoBarang">
-Belum ada barang
-</div>
-
-<br>
-
-<label>Qty</label>
+<input id="kasir_barcode" placeholder="scan barcode / nama">
 <input id="kasir_qty" type="number" value="1">
 
-<br><br>
+<button onclick="addCart()">Tambah</button>
 
-<button onclick="addCart()">Tambah ke Keranjang</button>
+<div id="infoBarang"></div>
 
-</div>
-
-
-<div class="card">
-
-<h3>Pembayaran</h3>
-
-<input
-id="uangBayar"
-placeholder="Uang dibayar"
-style="width:100%;font-size:16px"
-oninput="hitungKembalian()"
->
-
-<h3>Kembalian : Rp <span id="kembalian">0</span></h3>
-
-<button onclick="bayar()">Bayar</button>
-<button onclick="resetCart()">Batal</button>
-
-</div>
-
-</div>
-
-
-<div>
-
-<div class="card">
-
-<h3>Keranjang</h3>
-
-<table>
+<table border="1">
 
 <thead>
 
 <tr>
-<th>Barang</th>
+<th>Nama</th>
 <th>Harga</th>
 <th>Qty</th>
-<th>Total</th>
+<th>Subtotal</th>
 <th></th>
 </tr>
 
@@ -228,73 +67,52 @@ oninput="hitungKembalian()"
 
 </table>
 
-<h2>Total : Rp <span id="cartTotal">0</span></h2>
+<h3>Total : <span id="cartTotal">0</span></h3>
 
-</div>
-
-</div>
-
-</div>
+<button onclick="bayar()">Bayar</button>
 
 </div>
 
 
 <!-- INVENTORY -->
 
-<div id="inventory" class="section">
+<div id="inventory" class="section" style="display:none">
 
 <h2>Inventory</h2>
 
-<div class="card">
+<input id="inv_nama" placeholder="nama">
+<input id="inv_kategori" placeholder="kategori">
+<input id="inv_satuan" placeholder="satuan">
 
-<h3>Tambah Barang</h3>
+<input id="inv_modal" placeholder="harga modal">
+<input id="inv_jual" placeholder="harga jual">
 
-<input id="inv_barcode1" placeholder="Barcode 1">
-<input id="inv_barcode2" placeholder="Barcode 2">
-<input id="inv_barcode3" placeholder="Barcode 3">
+<input id="inv_stok" placeholder="stok">
+<input id="inv_minstok" placeholder="min stok">
 
-<br>
+<input id="inv_barcode1" placeholder="barcode 1">
+<input id="inv_barcode2" placeholder="barcode 2">
+<input id="inv_barcode3" placeholder="barcode 3">
 
-<input id="inv_nama" placeholder="Nama Barang">
-<input id="inv_kategori" placeholder="Kategori">
-<input id="inv_satuan" placeholder="Satuan">
+<button onclick="saveBarang()">Simpan</button>
 
-<br>
-
-<input id="inv_modal" placeholder="Modal">
-<input id="inv_jual" placeholder="Harga Jual">
-
-<br>
-
-<input id="inv_stok" placeholder="Stok">
-<input id="inv_minstok" placeholder="Min Stok">
-
-<br>
-
-<button onclick="saveBarang()">Simpan Barang</button>
+<br><br>
 
 <button onclick="exportInventory()">Export Excel</button>
 
-</div>
-
-<div class="card">
-
-<h3>Daftar Barang</h3>
-
-<table>
+<table border="1">
 
 <thead>
 
 <tr>
 <th>Nama</th>
 <th>Kategori</th>
-<th>Satuan</th>
 <th>Barcode</th>
 <th>Modal</th>
 <th>Jual</th>
 <th>Stok</th>
 <th>Min</th>
-<th>Aksi</th>
+<th></th>
 </tr>
 
 </thead>
@@ -305,27 +123,23 @@ oninput="hitungKembalian()"
 
 </div>
 
-</div>
-
 
 <!-- LAPORAN -->
 
-<div id="laporan" class="section">
+<div id="laporan" class="section" style="display:none">
 
-<h2>Laporan Penjualan</h2>
-
-<div class="card">
+<h2>Laporan</h2>
 
 <button onclick="exportLaporan()">Export Excel</button>
 
-<table>
+<table border="1">
 
 <thead>
 
 <tr>
 <th>Tanggal</th>
 <th>Total</th>
-<th>Jumlah Item</th>
+<th>Item</th>
 </tr>
 
 </thead>
@@ -336,31 +150,19 @@ oninput="hitungKembalian()"
 
 </div>
 
-</div>
-
 
 <!-- HUTANG -->
 
-<div id="hutang" class="section">
+<div id="hutang" class="section" style="display:none">
 
-<h2>Data Hutang</h2>
+<h2>Hutang</h2>
 
-<div class="card">
+<input id="hutang_nama" placeholder="nama">
+<input id="hutang_jumlah" placeholder="jumlah">
 
-<h3>Tambah Hutang</h3>
+<button onclick="tambahHutang()">Tambah</button>
 
-<input id="hutang_nama" placeholder="Nama Pelanggan">
-<input id="hutang_jumlah" placeholder="Jumlah Hutang">
-
-<br>
-
-<button onclick="tambahHutang()">Simpan Hutang</button>
-
-</div>
-
-<div class="card">
-
-<table>
+<table border="1">
 
 <thead>
 
@@ -369,7 +171,7 @@ oninput="hitungKembalian()"
 <th>Nama</th>
 <th>Jumlah</th>
 <th>Status</th>
-<th>Aksi</th>
+<th></th>
 </tr>
 
 </thead>
@@ -378,33 +180,16 @@ oninput="hitungKembalian()"
 
 </table>
 
-<button onclick="exportHutang()">Export Excel</button>
-
-</div>
-
 </div>
 
 
-<script src="app.js"></script>
-
-<script>
-
-document.addEventListener("DOMContentLoaded",function(){
-
-showPage("dashboard")
-
-kasir_barcode.addEventListener("keyup",function(e){
-
-if(e.key==="Enter"){
-addCart()
-}
-
-})
-
-})
-
-</script>
+<script src="js/database.js"></script>
+<script src="js/inventory.js"></script>
+<script src="js/kasir.js"></script>
+<script src="js/laporan.js"></script>
+<script src="js/hutang.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/main.js"></script>
 
 </body>
-
 </html>
