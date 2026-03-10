@@ -89,7 +89,7 @@ font-weight:bold;
 
 <body>
 
-<!-- ================= NAVBAR ================= -->
+<!-- NAVBAR -->
 
 <nav>
 
@@ -98,14 +98,11 @@ font-weight:bold;
 <button onclick="showPage('inventory')">Inventory</button>
 <button onclick="showPage('laporan')">Laporan</button>
 <button onclick="showPage('hutang')">Hutang</button>
-<button onclick="exportInventory()">Export Excel</button>
-<button onclick="exportLaporan()">Export Excel</button>
-
 
 </nav>
 
 
-<!-- ================= DASHBOARD ================= -->
+<!-- DASHBOARD -->
 
 <div id="dashboard" class="section">
 
@@ -133,7 +130,6 @@ Stok Menipis
 <div class="card">
 
 <h3>Waktu Sekarang</h3>
-
 <div id="timeNow"></div>
 
 </div>
@@ -141,15 +137,13 @@ Stok Menipis
 </div>
 
 
-<!-- ================= KASIR ================= -->
+<!-- KASIR -->
 
 <div id="kasir" class="section">
 
 <h2>Kasir</h2>
 
 <div class="kasir-grid">
-
-<!-- KIRI INPUT BARANG -->
 
 <div>
 
@@ -161,8 +155,6 @@ Stok Menipis
 id="kasir_barcode"
 placeholder="Scan barcode / ketik nama barang"
 style="width:100%;font-size:16px"
-onchange="addCart()"
-autofocus
 >
 
 <button onclick="scanKasir()">Scan Kamera</button>
@@ -171,21 +163,17 @@ autofocus
 
 </div>
 
-
 <div class="card">
 
 <h3>Info Barang</h3>
 
 <div id="infoBarang">
-
 Belum ada barang
-
 </div>
 
 <br>
 
 <label>Qty</label>
-
 <input id="kasir_qty" type="number" value="1">
 
 <br><br>
@@ -203,20 +191,18 @@ Belum ada barang
 id="uangBayar"
 placeholder="Uang dibayar"
 style="width:100%;font-size:16px"
+oninput="hitungKembalian()"
 >
 
 <h3>Kembalian : Rp <span id="kembalian">0</span></h3>
 
 <button onclick="bayar()">Bayar</button>
-
 <button onclick="resetCart()">Batal</button>
 
 </div>
 
 </div>
 
-
-<!-- KANAN KERANJANG -->
 
 <div>
 
@@ -229,13 +215,11 @@ style="width:100%;font-size:16px"
 <thead>
 
 <tr>
-
 <th>Barang</th>
 <th>Harga</th>
 <th>Qty</th>
 <th>Total</th>
 <th></th>
-
 </tr>
 
 </thead>
@@ -255,7 +239,7 @@ style="width:100%;font-size:16px"
 </div>
 
 
-<!-- ================= INVENTORY ================= -->
+<!-- INVENTORY -->
 
 <div id="inventory" class="section">
 
@@ -289,8 +273,9 @@ style="width:100%;font-size:16px"
 
 <button onclick="saveBarang()">Simpan Barang</button>
 
-</div>
+<button onclick="exportInventory()">Export Excel</button>
 
+</div>
 
 <div class="card">
 
@@ -301,7 +286,6 @@ style="width:100%;font-size:16px"
 <thead>
 
 <tr>
-
 <th>Nama</th>
 <th>Kategori</th>
 <th>Satuan</th>
@@ -311,7 +295,6 @@ style="width:100%;font-size:16px"
 <th>Stok</th>
 <th>Min</th>
 <th>Aksi</th>
-
 </tr>
 
 </thead>
@@ -325,7 +308,7 @@ style="width:100%;font-size:16px"
 </div>
 
 
-<!-- ================= LAPORAN ================= -->
+<!-- LAPORAN -->
 
 <div id="laporan" class="section">
 
@@ -333,16 +316,16 @@ style="width:100%;font-size:16px"
 
 <div class="card">
 
+<button onclick="exportLaporan()">Export Excel</button>
+
 <table>
 
 <thead>
 
 <tr>
-
 <th>Tanggal</th>
 <th>Total</th>
 <th>Jumlah Item</th>
-
 </tr>
 
 </thead>
@@ -356,21 +339,7 @@ style="width:100%;font-size:16px"
 </div>
 
 
-<script src="app.js"></script>
-
-<script>
-
-kasir_barcode.addEventListener("keyup",function(e){
-
-if(e.key === "Enter"){
-
-addCart()
-
-}
-
-})
-  
-<!-- ================= HUTANG ================= -->
+<!-- HUTANG -->
 
 <div id="hutang" class="section">
 
@@ -381,7 +350,6 @@ addCart()
 <h3>Tambah Hutang</h3>
 
 <input id="hutang_nama" placeholder="Nama Pelanggan">
-
 <input id="hutang_jumlah" placeholder="Jumlah Hutang">
 
 <br>
@@ -397,13 +365,11 @@ addCart()
 <thead>
 
 <tr>
-
 <th>Tanggal</th>
 <th>Nama</th>
 <th>Jumlah</th>
 <th>Status</th>
 <th>Aksi</th>
-
 </tr>
 
 </thead>
@@ -418,13 +384,27 @@ addCart()
 
 </div>
 
+
+<script src="app.js"></script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded",function(){
+
+showPage("dashboard")
+
+kasir_barcode.addEventListener("keyup",function(e){
+
+if(e.key==="Enter"){
+addCart()
+}
+
+})
+
+})
+
 </script>
 
 </body>
 
 </html>
-
-
-
-
-
