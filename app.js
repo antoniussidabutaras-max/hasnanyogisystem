@@ -375,8 +375,3 @@ bayar()
 
 })
 
-setInterval(()=>{
-
-kasir_barcode.focus()
-
-},1000)
