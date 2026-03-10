@@ -458,3 +458,17 @@ kasir_harga_manual.value=""
 kasir_barcode.focus()
 
 }
+
+function checkMinStock(){
+
+inventory.forEach(item=>{
+
+if(item.stok <= (item.minStock || 0)){
+
+console.warn("Stok minimum tercapai:", item.nama)
+
+}
+
+})
+
+}
