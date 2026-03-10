@@ -63,7 +63,29 @@ barcodes:barcodes
 
 }
 
-inventory.push(barang)
+let item = {
+
+id: Date.now(),
+
+nama: namaBarang.value,
+
+kategori: kategoriBarang.value || "Umum",
+
+modal: Number(hargaModal.value) || 0,
+
+jual: Number(hargaJual.value),
+
+stok: Number(stokBarang.value) || 0,
+
+minStock: Number(minStock.value) || 0,
+
+barcode: barcodeBarang.value,
+
+barcodes: multiBarcodeArray || []
+
+}
+
+inventory.push(item)
 
 localStorage.setItem("inventory",JSON.stringify(inventory))
 
