@@ -12,28 +12,23 @@
 
 body{
 font-family:Arial;
-background:#f2f2f2;
+background:#f5f5f5;
 margin:0;
 }
 
 nav{
-background:#1f1f1f;
+background:#222;
 padding:10px;
 display:flex;
 gap:10px;
 }
 
 nav button{
-padding:10px 15px;
+padding:10px;
 border:none;
-background:#333;
+background:#444;
 color:white;
 cursor:pointer;
-border-radius:5px;
-}
-
-nav button:hover{
-background:#555;
 }
 
 .section{
@@ -45,8 +40,8 @@ padding:20px;
 background:white;
 padding:15px;
 margin-bottom:20px;
-border-radius:10px;
-box-shadow:0 2px 8px rgba(0,0,0,0.1);
+border-radius:8px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
 table{
@@ -59,7 +54,7 @@ padding:8px;
 border-bottom:1px solid #ddd;
 }
 
-input,select{
+input{
 padding:8px;
 margin:5px;
 }
@@ -70,19 +65,10 @@ grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 gap:15px;
 }
 
-.big-number{
-font-size:24px;
-font-weight:bold;
-}
-
 .kasir-grid{
 display:grid;
 grid-template-columns:350px 1fr;
 gap:20px;
-}
-
-#reader{
-margin-top:10px;
 }
 
 </style>
@@ -100,9 +86,7 @@ margin-top:10px;
 
 </nav>
 
-<!-- ===================== -->
 <!-- DASHBOARD -->
-<!-- ===================== -->
 
 <div id="dashboard" class="section">
 
@@ -111,52 +95,30 @@ margin-top:10px;
 <div class="dashboard-grid">
 
 <div class="card">
-Penjualan Hari Ini
-<div class="big-number" id="salesToday">0</div>
+Total Produk
+<h2 id="totalProduk">0</h2>
 </div>
 
 <div class="card">
-Keuntungan Hari Ini
-<div class="big-number" id="profitToday">0</div>
+Total Omzet
+<h2 id="omzet">0</h2>
 </div>
 
 <div class="card">
-Barang Terjual
-<div class="big-number" id="itemSold">0</div>
-</div>
-
-<div class="card">
-Total Transaksi
-<div class="big-number" id="totalTransaksi">0</div>
+Stok Menipis
+<h2 id="stokMenipis">0</h2>
 </div>
 
 </div>
 
 <div class="card">
-<h3>Barang Paling Laku</h3>
-<div id="topBarang"></div>
-</div>
-
-<div class="card">
-<h3>Alert Stok Minimum</h3>
-<div id="alertStock"></div>
-</div>
-
-<div class="card">
-<h3>Waktu Sekarang</h3>
+<h3>Waktu</h3>
 <div id="timeNow"></div>
 </div>
 
-<div class="card">
-<canvas id="chartSales"></canvas>
 </div>
 
-</div>
-
-
-<!-- ===================== -->
 <!-- KASIR -->
-<!-- ===================== -->
 
 <div id="kasir" class="section">
 
@@ -164,18 +126,14 @@ Total Transaksi
 
 <div class="kasir-grid">
 
-<!-- INPUT BARANG -->
-
 <div>
 
 <div class="card">
 
-<h3>Scan / Cari Barang</h3>
-
-<input 
+<input
 id="kasir_barcode"
 placeholder="Scan barcode / ketik nama barang"
-style="width:100%;font-size:16px;padding:10px"
+style="width:100%;font-size:16px"
 onchange="addCart()"
 autofocus
 >
@@ -190,14 +148,14 @@ autofocus
 
 <h3>Info Barang</h3>
 
-<div id="infoBarang">Belum ada barang</div>
+<div id="infoBarang"></div>
 
 <label>Qty</label>
 <input id="kasir_qty" type="number" value="1">
 
 <br><br>
 
-<button onclick="addCart()">Tambah ke Keranjang</button>
+<button onclick="addCart()">Tambah</button>
 
 </div>
 
@@ -205,12 +163,7 @@ autofocus
 
 <h3>Pembayaran</h3>
 
-<input 
-id="uangBayar"
-placeholder="Uang dibayar"
-style="font-size:18px;width:100%"
-oninput="hitungKembalian()"
->
+<input id="uangBayar" placeholder="Uang dibayar">
 
 <h3>Kembalian : Rp <span id="kembalian">0</span></h3>
 
@@ -221,27 +174,20 @@ oninput="hitungKembalian()"
 
 </div>
 
-
-<!-- CART -->
-
 <div>
 
 <div class="card">
-
-<h3>Keranjang</h3>
 
 <table>
 
 <thead>
 
 <tr>
-
 <th>Barang</th>
 <th>Harga</th>
 <th>Qty</th>
 <th>Total</th>
 <th></th>
-
 </tr>
 
 </thead>
@@ -260,17 +206,13 @@ oninput="hitungKembalian()"
 
 </div>
 
-<!-- ===================== -->
 <!-- INVENTORY -->
-<!-- ===================== -->
 
 <div id="inventory" class="section">
 
 <h2>Inventory</h2>
 
 <div class="card">
-
-<h3>Tambah Barang</h3>
 
 <input id="inv_barcode1" placeholder="Barcode 1">
 <input id="inv_barcode2" placeholder="Barcode 2">
@@ -300,10 +242,6 @@ oninput="hitungKembalian()"
 
 <div class="card">
 
-<h3>Daftar Barang</h3>
-
-<input id="searchInventory" placeholder="Cari barang">
-
 <table>
 
 <thead>
@@ -332,10 +270,7 @@ oninput="hitungKembalian()"
 
 </div>
 
-
-<!-- ===================== -->
 <!-- LAPORAN -->
-<!-- ===================== -->
 
 <div id="laporan" class="section">
 
