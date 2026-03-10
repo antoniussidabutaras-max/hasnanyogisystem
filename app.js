@@ -82,6 +82,22 @@ resetInventoryForm()
 
 }
 
+searchInventory?.addEventListener("input",function(){
+
+let keyword = this.value.toLowerCase()
+
+let rows = inventoryTable.querySelectorAll("tr")
+
+rows.forEach(r=>{
+
+let nama = r.children[0].innerText.toLowerCase()
+
+r.style.display = nama.includes(keyword) ? "" : "none"
+
+})
+
+})
+
 // ==========================
 // RENDER INVENTORY
 // ==========================
@@ -411,6 +427,13 @@ stokMenipis.innerText = lowStock.length
 
 }
 
+let alert = inventory
+.filter(i => i.stok <= i.minstok)
+.map(i => "⚠️ "+i.nama+" ("+i.stok+")")
+.join("<br>")
+
+document.getElementById("alertStock")?.innerHTML = alert
+
 // ==========================
 // LAPORAN
 // ==========================
@@ -532,3 +555,20 @@ console.warn("Stok minimum:", item.nama)
 })
 
 }
+
+function hitungKembalian(){
+
+let bayar = Number(uangBayar.value) || 0
+let total = Number(cartTotal.innerText) || 0
+
+let kembali = bayar - total
+
+kembalian.innerText = kembali > 0 ? kembali : 0
+
+}
+
+setInterval(()=>{
+
+kasir_barcode?.focus()
+
+},2000)
