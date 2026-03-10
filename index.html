@@ -12,24 +12,28 @@
 
 body{
 font-family:Arial;
-background:#f5f5f5;
+background:#f2f2f2;
 margin:0;
 }
 
 nav{
-background:#222;
-color:white;
+background:#1f1f1f;
 padding:10px;
 display:flex;
 gap:10px;
 }
 
 nav button{
-padding:10px;
+padding:10px 15px;
 border:none;
-background:#444;
+background:#333;
 color:white;
 cursor:pointer;
+border-radius:5px;
+}
+
+nav button:hover{
+background:#555;
 }
 
 .section{
@@ -41,8 +45,8 @@ padding:20px;
 background:white;
 padding:15px;
 margin-bottom:20px;
-border-radius:8px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
 table{
@@ -53,7 +57,6 @@ border-collapse:collapse;
 th,td{
 padding:8px;
 border-bottom:1px solid #ddd;
-text-align:left;
 }
 
 input,select{
@@ -65,6 +68,21 @@ margin:5px;
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 gap:15px;
+}
+
+.big-number{
+font-size:24px;
+font-weight:bold;
+}
+
+.kasir-grid{
+display:grid;
+grid-template-columns:350px 1fr;
+gap:20px;
+}
+
+#reader{
+margin-top:10px;
 }
 
 </style>
@@ -93,23 +111,23 @@ gap:15px;
 <div class="dashboard-grid">
 
 <div class="card">
-<h3>Penjualan Hari Ini</h3>
-<div id="salesToday">0</div>
+Penjualan Hari Ini
+<div class="big-number" id="salesToday">0</div>
 </div>
 
 <div class="card">
-<h3>Keuntungan Hari Ini</h3>
-<div id="profitToday">0</div>
+Keuntungan Hari Ini
+<div class="big-number" id="profitToday">0</div>
 </div>
 
 <div class="card">
-<h3>Barang Terjual</h3>
-<div id="itemSold">0</div>
+Barang Terjual
+<div class="big-number" id="itemSold">0</div>
 </div>
 
 <div class="card">
-<h3>Total Transaksi</h3>
-<div id="totalTransaksi">0</div>
+Total Transaksi
+<div class="big-number" id="totalTransaksi">0</div>
 </div>
 
 </div>
@@ -125,50 +143,92 @@ gap:15px;
 </div>
 
 <div class="card">
-<h3>Waktu</h3>
+<h3>Waktu Sekarang</h3>
 <div id="timeNow"></div>
 </div>
 
+<div class="card">
 <canvas id="chartSales"></canvas>
+</div>
 
 </div>
+
 
 <!-- ===================== -->
 <!-- KASIR -->
 <!-- ===================== -->
 
+<div id="kasir" class="section">
+
+<h2>Kasir</h2>
+
+<div class="kasir-grid">
+
+<!-- INPUT BARANG -->
+
+<div>
+
 <div class="card">
 
-<h3>Input Barang</h3>
+<h3>Scan / Cari Barang</h3>
 
 <input 
 id="kasir_barcode"
 placeholder="Scan barcode / ketik nama barang"
-style="width:100%;padding:10px;font-size:16px"
-oninput="cariBarangKasir()"
+style="width:100%;font-size:16px;padding:10px"
+onchange="addCart()"
+autofocus
 >
 
 <button onclick="scanKasir()">Scan Kamera</button>
 
-<br><br>
+<div id="reader"></div>
 
-<label>Nama Barang</label>
-<input id="kasir_nama" readonly style="width:100%">
+</div>
 
-<label>Kategori</label>
-<input id="kasir_kategori" readonly style="width:100%">
+<div class="card">
+
+<h3>Info Barang</h3>
+
+<div id="infoBarang">Belum ada barang</div>
 
 <label>Qty</label>
-<input id="kasir_qty" type="number" value="1" style="width:100px">
+<input id="kasir_qty" type="number" value="1">
 
 <br><br>
 
-<button onclick="tambahKasir()">Tambah ke Keranjang</button>
+<button onclick="addCart()">Tambah ke Keranjang</button>
+
+</div>
+
+<div class="card">
+
+<h3>Pembayaran</h3>
+
+<input 
+id="uangBayar"
+placeholder="Uang dibayar"
+style="font-size:18px;width:100%"
+oninput="hitungKembalian()"
+>
+
+<h3>Kembalian : Rp <span id="kembalian">0</span></h3>
+
+<button onclick="bayar()">Bayar</button>
+<button onclick="resetCart()">Batal</button>
+
+</div>
 
 </div>
 
 
+<!-- CART -->
+
+<div>
+
 <div class="card">
+
+<h3>Keranjang</h3>
 
 <table>
 
@@ -190,40 +250,15 @@ oninput="cariBarangKasir()"
 
 </table>
 
-<h2>Total Belanja : Rp <span id="cartTotal">0</span></h2>
+<h2>Total : Rp <span id="cartTotal">0</span></h2>
 
 </div>
 
-
-<div class="card">
-
-<h3>Pembayaran</h3>
-
-<input 
-id="uangBayar"
-placeholder="Uang dibayar"
-style="font-size:18px"
->
-
-<h3>Kembalian : Rp <span id="kembalian">0</span></h3>
-
-<button onclick="bayar()">Bayar</button>
-
-<button onclick="resetCart()">Batal</button>
+</div>
 
 </div>
 
-
-<div id="reader"></div>
-
 </div>
-
-<input 
-id="kasir_barcode" 
-placeholder="Scan barcode..."
-onchange="addCart()"
-autofocus
->
 
 <!-- ===================== -->
 <!-- INVENTORY -->
@@ -234,6 +269,8 @@ autofocus
 <h2>Inventory</h2>
 
 <div class="card">
+
+<h3>Tambah Barang</h3>
 
 <input id="inv_barcode1" placeholder="Barcode 1">
 <input id="inv_barcode2" placeholder="Barcode 2">
@@ -258,11 +295,12 @@ autofocus
 <br>
 
 <button onclick="saveBarang()">Simpan Barang</button>
-<button onclick="scanInventory()">Scan Barcode</button>
 
 </div>
 
 <div class="card">
+
+<h3>Daftar Barang</h3>
 
 <input id="searchInventory" placeholder="Cari barang">
 
@@ -294,6 +332,7 @@ autofocus
 
 </div>
 
+
 <!-- ===================== -->
 <!-- LAPORAN -->
 <!-- ===================== -->
@@ -311,13 +350,8 @@ autofocus
 <tr>
 
 <th>Tanggal</th>
-<th>Jam</th>
-<th>Barcode</th>
-<th>Nama</th>
-<th>Satuan</th>
-<th>Qty</th>
-<th>Modal</th>
-<th>Jual</th>
+<th>Total</th>
+<th>Jumlah Item</th>
 
 </tr>
 
@@ -335,9 +369,3 @@ autofocus
 
 </body>
 </html>
-
-
-
-
-
-
