@@ -125,26 +125,19 @@ checkMinStock()
 
 renderInventory()
 
-function cariBarangKasir(){
+function cariBarang(keyword){
 
-let keyword = kasir_barcode.value.trim().toLowerCase()
+keyword = keyword.toLowerCase()
 
-let barang = inventory.find(b =>
+return inventory.find(b =>
 
 b.barcode == keyword ||
-b.nama.toLowerCase().includes(keyword) ||
-(b.barcodes && b.barcodes.includes(keyword))
+
+(b.barcodes && b.barcodes.includes(keyword)) ||
+
+b.nama.toLowerCase().includes(keyword)
 
 )
-
-if(barang){
-
-kasir_nama.value = barang.nama
-kasir_kategori.value = barang.kategori || "Umum"
-
-kasir_nama.dataset.harga = barang.jual
-
-}
 
 }
 
@@ -310,31 +303,17 @@ resetCart()
 
 function renderDashboard(){
 
-let sales=0
-let profit=0
-let items=0
+totalProduk.innerText = inventory.length
 
-let today=new Date().toLocaleDateString()
+let totalSales = sales.reduce((t,s)=>t+s.total,0)
 
-laporan.forEach(l=>{
+omzet.innerText = totalSales
 
-if(l.tanggal==today){
+let lowStock = inventory.filter(i=>i.stok<=i.minStock)
 
-sales += l.jual*l.qty
-profit += (l.jual-l.modal)*l.qty
-items += l.qty
+stokMenipis.innerText = lowStock.length
 
 }
-
-})
-
-salesToday.innerText=sales
-profitToday.innerText=profit
-itemSold.innerText=items
-totalTransaksi.innerText=laporan.length
-
-}
-
 let scanner
 
 function scanKasir(){
@@ -386,73 +365,66 @@ addCart()
 
 if(e.key=="F4"){
 bayar()
+let transaksi = {
+
+tanggal: new Date().toISOString(),
+
+items: cart,
+
+total: totalBelanja
+
+}
+
+sales.push(transaksi)
+
+localStorage.setItem("sales",JSON.stringify(sales))
 }
 
 })
 
 function tambahKasir(){
 
-let nama = kasir_nama.value
-let kategori = kasir_kategori.value
-let harga = Number(kasir_nama.dataset.harga)
-let qty = Number(kasir_qty.value) || 1
+let keyword = kasir_barcode.value
 
-if(!nama){
+let barang = cariBarang(keyword)
 
-alert("Barang belum dipilih")
+if(!barang){
+
+alert("Barang tidak ditemukan")
 
 return
 
 }
 
-let existing = cart.find(c=>c.nama===nama)
+let existing = cart.find(c=>c.id===barang.id)
 
 if(existing){
 
-existing.qty += qty
+existing.qty++
 
 }else{
 
 cart.push({
 
-nama:nama,
-kategori:kategori,
-harga:harga,
-qty:qty
+id: barang.id,
+
+nama: barang.nama,
+
+kategori: barang.kategori,
+
+harga: barang.jual,
+
+qty: 1
 
 })
 
 }
 
-resetKasir()
+kasir_barcode.value=""
 
 renderCart()
 
 }
-
-let existing = cart.find(c=>c.nama===nama)
-
-if(existing){
-
-existing.qty += qty
-
-}else{
-
-cart.push({
-
-barcode: barcode || "-",
-nama: nama,
-harga: harga,
-kategori: kategori,
-qty: qty
-
-})
-
-}
-
-resetKasirInput()
-
-renderCart()
 
 html += `
 
@@ -492,6 +464,32 @@ console.warn("Stok minimum tercapai:", item.nama)
 }
 
 })
+
+}
+
+function renderLaporan(){
+
+let html=""
+
+sales.forEach(s=>{
+
+html+=`
+
+<tr>
+
+<td>${new Date(s.tanggal).toLocaleDateString()}</td>
+
+<td>${s.total}</td>
+
+<td>${s.items.length} item</td>
+
+</tr>
+
+`
+
+})
+
+laporanTable.innerHTML=html
 
 }
 
