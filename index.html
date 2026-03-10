@@ -97,6 +97,7 @@ font-weight:bold;
 <button onclick="showPage('kasir')">Kasir</button>
 <button onclick="showPage('inventory')">Inventory</button>
 <button onclick="showPage('laporan')">Laporan</button>
+<button onclick="showPage('hutang')">Hutang</button>
 
 </nav>
 
@@ -366,9 +367,58 @@ addCart()
 
 })
 
+<!-- ================= HUTANG ================= -->
+
+<div id="hutang" class="section">
+
+<h2>Data Hutang</h2>
+
+<div class="card">
+
+<h3>Tambah Hutang</h3>
+
+<input id="hutang_nama" placeholder="Nama Pelanggan">
+
+<input id="hutang_jumlah" placeholder="Jumlah Hutang">
+
+<br>
+
+<button onclick="tambahHutang()">Simpan Hutang</button>
+
+</div>
+
+<div class="card">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Tanggal</th>
+<th>Nama</th>
+<th>Jumlah</th>
+<th>Status</th>
+<th>Aksi</th>
+
+</tr>
+
+</thead>
+
+<tbody id="hutangTable"></tbody>
+
+</table>
+
+<button onclick="exportHutang()">Export Excel</button>
+
+</div>
+
+</div>
+
 </script>
 
 </body>
 
 </html>
+
 
