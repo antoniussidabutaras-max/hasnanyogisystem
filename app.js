@@ -572,3 +572,141 @@ setInterval(()=>{
 kasir_barcode?.focus()
 
 },2000)
+
+function tambahHutang(){
+
+let nama = hutang_nama.value
+let jumlah = Number(hutang_jumlah.value)
+
+if(!nama || !jumlah){
+
+alert("Isi data hutang")
+
+return
+
+}
+
+hutang.push({
+
+tanggal:new Date().toLocaleDateString(),
+
+nama:nama,
+
+jumlah:jumlah,
+
+status:"Belum"
+
+})
+
+localStorage.setItem("hutang",JSON.stringify(hutang))
+
+renderHutang()
+
+hutang_nama.value=""
+hutang_jumlah.value=""
+
+}
+
+function renderHutang(){
+
+let html=""
+
+hutang.forEach((h,i)=>{
+
+html+=`
+
+<tr>
+
+<td>${h.tanggal}</td>
+
+<td>${h.nama}</td>
+
+<td>${h.jumlah}</td>
+
+<td>${h.status}</td>
+
+<td>
+
+<button onclick="bayarHutang(${i})">Bayar</button>
+
+</td>
+
+</tr>
+
+`
+
+})
+
+hutangTable.innerHTML=html
+
+}
+
+function bayarHutang(i){
+
+hutang[i].status="Lunas"
+
+localStorage.setItem("hutang",JSON.stringify(hutang))
+
+renderHutang()
+
+}
+
+renderHutang()
+
+function exportInventory(){
+
+let csv="Nama,Kategori,Satuan,Modal,Jual,Stok\n"
+
+inventory.forEach(i=>{
+
+csv+=`${i.nama},${i.kategori},${i.satuan},${i.modal},${i.jual},${i.stok}\n`
+
+})
+
+downloadCSV(csv,"inventory.csv")
+
+}
+
+function exportLaporan(){
+
+let csv="Tanggal,Nama,Qty,Jual,Total\n"
+
+laporan.forEach(l=>{
+
+csv+=`${l.tanggal},${l.nama},${l.qty},${l.jual},${l.total}\n`
+
+})
+
+downloadCSV(csv,"laporan.csv")
+
+}
+
+function exportHutang(){
+
+let csv="Tanggal,Nama,Jumlah,Status\n"
+
+hutang.forEach(h=>{
+
+csv+=`${h.tanggal},${h.nama},${h.jumlah},${h.status}\n`
+
+})
+
+downloadCSV(csv,"hutang.csv")
+
+}
+
+function downloadCSV(data,filename){
+
+let blob = new Blob([data],{type:"text/csv"})
+
+let url = window.URL.createObjectURL(blob)
+
+let a=document.createElement("a")
+
+a.href=url
+
+a.download=filename
+
+a.click()
+
+}
