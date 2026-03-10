@@ -7,7 +7,8 @@ let laporan = JSON.parse(localStorage.getItem("laporan")) || []
 let hutang = JSON.parse(localStorage.getItem("hutang")) || []
 let sales = JSON.parse(localStorage.getItem("sales")) || []
 
-let cart = []
+let cart=[]
+
 
 // ==========================
 // NAVIGATION
@@ -16,13 +17,12 @@ let cart = []
 function showPage(id){
 
 document.querySelectorAll(".section")
-.forEach(s => s.style.display="none")
+.forEach(s=>s.style.display="none")
 
 document.getElementById(id).style.display="block"
 
 }
 
-showPage("dashboard")
 
 // ==========================
 // CLOCK
@@ -30,9 +30,9 @@ showPage("dashboard")
 
 setInterval(()=>{
 
-let now = new Date()
+let now=new Date()
 
-timeNow.innerText =
+timeNow.innerText=
 now.toLocaleDateString()+" "+now.toLocaleTimeString()
 
 },1000)
@@ -55,14 +55,14 @@ let barang={
 id:Date.now(),
 
 nama:inv_nama.value,
-kategori:inv_kategori.value || "Umum",
-satuan:inv_satuan.value || "pcs",
+kategori:inv_kategori.value||"Umum",
+satuan:inv_satuan.value||"pcs",
 
-modal:Number(inv_modal.value) || 0,
-jual:Number(inv_jual.value) || 0,
+modal:Number(inv_modal.value)||0,
+jual:Number(inv_jual.value)||0,
 
-stok:Number(inv_stok.value) || 0,
-minstok:Number(inv_minstok.value) || 0,
+stok:Number(inv_stok.value)||0,
+minstok:Number(inv_minstok.value)||0,
 
 barcodes:barcodes
 
@@ -79,52 +79,32 @@ resetInventoryForm()
 
 }
 
+
 // ==========================
-// RENDER INVENTORY
+// EDIT BARANG
 // ==========================
 
-function renderInventory(){
+function editBarang(i){
 
-let html=""
+let b=inventory[i]
 
-inventory.forEach((b,i)=>{
+let nama=prompt("Nama barang",b.nama)
+let harga=prompt("Harga jual",b.jual)
 
-let barcodeText = (b.barcodes || []).join(",")
+if(!nama) return
 
-html+=`
+b.nama=nama
+b.jual=Number(harga)
 
-<tr>
+localStorage.setItem("inventory",JSON.stringify(inventory))
 
-<td>${b.nama}</td>
-<td>${b.kategori}</td>
-<td>${b.satuan}</td>
-
-<td>${barcodeText}</td>
-
-<td>${b.modal}</td>
-<td>${b.jual}</td>
-
-<td>${b.stok}</td>
-<td>${b.minstok}</td>
-
-<td>
-<button onclick="hapusBarang(${i})">Hapus</button>
-</td>
-
-</tr>
-
-`
-
-})
-
-inventoryTable.innerHTML=html
-
-checkMinStock()
+renderInventory()
 
 }
 
+
 // ==========================
-// DELETE PRODUCT
+// DELETE BARANG
 // ==========================
 
 function hapusBarang(i){
@@ -142,19 +122,66 @@ renderDashboard()
 
 }
 
+
+// ==========================
+// RENDER INVENTORY
+// ==========================
+
+function renderInventory(){
+
+let html=""
+
+inventory.forEach((b,i)=>{
+
+let barcode=(b.barcodes||[]).join(",")
+
+html+=`
+
+<tr>
+
+<td>${b.nama}</td>
+<td>${b.kategori}</td>
+<td>${b.satuan}</td>
+<td>${barcode}</td>
+
+<td>${b.modal}</td>
+<td>${b.jual}</td>
+
+<td>${b.stok}</td>
+<td>${b.minstok}</td>
+
+<td>
+
+<button onclick="editBarang(${i})">Edit</button>
+<button onclick="hapusBarang(${i})">Hapus</button>
+
+</td>
+
+</tr>
+
+`
+
+})
+
+inventoryTable.innerHTML=html
+
+checkMinStock()
+
+}
+
+
 // ==========================
 // SEARCH PRODUCT
 // ==========================
 
 function cariBarang(keyword){
 
-keyword = keyword.toLowerCase().trim()
+keyword=keyword.toLowerCase().trim()
 
-return inventory.find(b =>
+return inventory.find(b=>
 
-(b.barcodes || []).some(code =>
-String(code).toLowerCase() === keyword
-)
+(b.barcodes||[]).some(code=>
+String(code).toLowerCase()===keyword)
 
 ||
 
@@ -164,17 +191,18 @@ b.nama.toLowerCase().includes(keyword)
 
 }
 
+
 // ==========================
 // ADD CART
 // ==========================
 
 function addCart(){
 
-let keyword = kasir_barcode.value.trim()
+let keyword=kasir_barcode.value.trim()
 
 if(!keyword) return
 
-let barang = cariBarang(keyword)
+let barang=cariBarang(keyword)
 
 if(!barang){
 
@@ -184,20 +212,20 @@ return
 
 }
 
-let qty = Number(kasir_qty.value) || 1
+let qty=Number(kasir_qty.value)||1
 
-if(barang.stok < qty){
+if(barang.stok<qty){
 
-alert("⚠️ Stok tidak cukup")
+alert("Stok tidak cukup")
 return
 
 }
 
-let existing = cart.find(c=>c.id===barang.id)
+let existing=cart.find(c=>c.id===barang.id)
 
 if(existing){
 
-existing.qty += qty
+existing.qty+=qty
 
 }else{
 
@@ -205,8 +233,6 @@ cart.push({
 
 id:barang.id,
 nama:barang.nama,
-kategori:barang.kategori,
-satuan:barang.satuan,
 
 modal:barang.modal,
 jual:barang.jual,
@@ -217,7 +243,7 @@ qty:qty
 
 }
 
-infoBarang.innerHTML =
+infoBarang.innerHTML=
 
 "<b>"+barang.nama+"</b><br>"+
 "Harga : "+barang.jual+"<br>"+
@@ -229,6 +255,7 @@ kasir_qty.value=1
 renderCart()
 
 }
+
 
 // ==========================
 // CART
@@ -242,6 +269,7 @@ let total=0
 cart.forEach((c,i)=>{
 
 let sub=c.qty*c.jual
+
 total+=sub
 
 html+=`
@@ -277,9 +305,11 @@ ${c.qty}
 })
 
 cartTable.innerHTML=html
+
 cartTotal.innerText=total
 
 }
+
 
 // ==========================
 // CART CONTROL
@@ -288,6 +318,7 @@ cartTotal.innerText=total
 function plusQty(i){
 
 cart[i].qty++
+
 renderCart()
 
 }
@@ -314,6 +345,7 @@ renderCart()
 
 }
 
+
 // ==========================
 // PAYMENT
 // ==========================
@@ -328,28 +360,32 @@ return
 }
 
 let now=new Date()
+
 let total=0
 
 cart.forEach(c=>{
 
 let sub=c.qty*c.jual
+
 total+=sub
 
 laporan.push({
 
 tanggal:now.toLocaleDateString(),
+
 nama:c.nama,
 qty:c.qty,
+
 jual:c.jual,
 total:sub
 
 })
 
-let barang = inventory.find(b=>b.id===c.id)
+let barang=inventory.find(b=>b.id===c.id)
 
 if(barang){
 
-barang.stok -= c.qty
+barang.stok-=c.qty
 
 }
 
@@ -358,7 +394,9 @@ barang.stok -= c.qty
 sales.push({
 
 tanggal:now.toISOString(),
+
 items:cart,
+
 total:total
 
 })
@@ -375,6 +413,7 @@ resetCart()
 
 }
 
+
 // ==========================
 // RESET CART
 // ==========================
@@ -382,9 +421,11 @@ resetCart()
 function resetCart(){
 
 cart=[]
+
 renderCart()
 
 }
+
 
 // ==========================
 // DASHBOARD
@@ -392,17 +433,68 @@ renderCart()
 
 function renderDashboard(){
 
-totalProduk.innerText = inventory.length
+totalProduk.innerText=inventory.length
 
-let totalSales = sales.reduce((t,s)=>t+s.total,0)
+let omzetTotal=sales.reduce((t,s)=>t+s.total,0)
 
-omzet.innerText = totalSales
+omzet.innerText=omzetTotal
 
-let lowStock = inventory.filter(i=>i.stok<=i.minstok)
+let low=inventory.filter(i=>i.stok<=i.minstok)
 
-stokMenipis.innerText = lowStock.length
+stokMenipis.innerText=low.length
+
+renderChart()
 
 }
+
+
+// ==========================
+// SALES CHART
+// ==========================
+
+let chart
+
+function renderChart(){
+
+let data={}
+
+sales.forEach(s=>{
+
+let t=new Date(s.tanggal).toLocaleDateString()
+
+if(!data[t]) data[t]=0
+
+data[t]+=s.total
+
+})
+
+let labels=Object.keys(data)
+let values=Object.values(data)
+
+if(chart) chart.destroy()
+
+chart=new Chart(salesChart,{
+
+type:"bar",
+
+data:{
+
+labels:labels,
+
+datasets:[{
+
+label:"Penjualan",
+
+data:values
+
+}]
+
+}
+
+})
+
+}
+
 
 // ==========================
 // LAPORAN
@@ -434,37 +526,6 @@ laporanTable.innerHTML=html
 
 }
 
-// ==========================
-// BARCODE SCANNER
-// ==========================
-
-let scanner
-
-function scanKasir(){
-
-if(scanner){
-
-scanner.stop()
-
-}
-
-scanner = new Html5Qrcode("reader")
-
-scanner.start(
-{ facingMode:"environment" },
-{
-fps:10,
-qrbox:250
-},
-barcode=>{
-
-kasir_barcode.value = barcode
-addCart()
-scanner.stop()
-
-})
-
-}
 
 // ==========================
 // HUTANG
@@ -472,10 +533,10 @@ scanner.stop()
 
 function tambahHutang(){
 
-let nama = hutang_nama.value
-let jumlah = Number(hutang_jumlah.value)
+let nama=hutang_nama.value
+let jumlah=Number(hutang_jumlah.value)
 
-if(!nama || !jumlah){
+if(!nama||!jumlah){
 
 alert("Isi data hutang")
 return
@@ -485,8 +546,10 @@ return
 hutang.push({
 
 tanggal:new Date().toLocaleDateString(),
+
 nama:nama,
 jumlah:jumlah,
+
 status:"Belum"
 
 })
@@ -500,6 +563,7 @@ hutang_jumlah.value=""
 
 }
 
+
 function renderHutang(){
 
 let html=""
@@ -511,8 +575,11 @@ html+=`
 <tr>
 
 <td>${h.tanggal}</td>
+
 <td>${h.nama}</td>
+
 <td>${h.jumlah}</td>
+
 <td>${h.status}</td>
 
 <td>
@@ -531,6 +598,7 @@ hutangTable.innerHTML=html
 
 }
 
+
 function bayarHutang(i){
 
 hutang[i].status="Lunas"
@@ -541,17 +609,33 @@ renderHutang()
 
 }
 
+
 // ==========================
 // EXPORT CSV
 // ==========================
 
+function downloadCSV(data,name){
+
+let blob=new Blob([data],{type:"text/csv"})
+
+let url=URL.createObjectURL(blob)
+
+let a=document.createElement("a")
+
+a.href=url
+a.download=name
+
+a.click()
+
+}
+
 function exportInventory(){
 
-let csv="Nama,Kategori,Satuan,Modal,Jual,Stok\n"
+let csv="Nama,Kategori,Jual,Stok\n"
 
 inventory.forEach(i=>{
 
-csv+=`${i.nama},${i.kategori},${i.satuan},${i.modal},${i.jual},${i.stok}\n`
+csv+=`${i.nama},${i.kategori},${i.jual},${i.stok}\n`
 
 })
 
@@ -561,11 +645,11 @@ downloadCSV(csv,"inventory.csv")
 
 function exportLaporan(){
 
-let csv="Tanggal,Nama,Qty,Jual,Total\n"
+let csv="Tanggal,Nama,Qty,Total\n"
 
 laporan.forEach(l=>{
 
-csv+=`${l.tanggal},${l.nama},${l.qty},${l.jual},${l.total}\n`
+csv+=`${l.tanggal},${l.nama},${l.qty},${l.total}\n`
 
 })
 
@@ -573,77 +657,44 @@ downloadCSV(csv,"laporan.csv")
 
 }
 
-function exportHutang(){
-
-let csv="Tanggal,Nama,Jumlah,Status\n"
-
-hutang.forEach(h=>{
-
-csv+=`${h.tanggal},${h.nama},${h.jumlah},${h.status}\n`
-
-})
-
-downloadCSV(csv,"hutang.csv")
-
-}
-
-function downloadCSV(data,filename){
-
-let blob=new Blob([data],{type:"text/csv"})
-let url=URL.createObjectURL(blob)
-
-let a=document.createElement("a")
-
-a.href=url
-a.download=filename
-
-a.click()
-
-}
 
 // ==========================
-// UTILITIES
+// LOW STOCK WARNING
 // ==========================
 
 function checkMinStock(){
 
-inventory.forEach(item=>{
+inventory.forEach(i=>{
 
-if(item.stok <= (item.minstok || 0)){
+if(i.stok<=i.minstok){
 
-console.warn("Stok minimum:",item.nama)
+console.warn("Stok menipis:",i.nama)
 
 }
 
 })
 
 }
+
+
+// ==========================
+// KEMBALIAN
+// ==========================
 
 function hitungKembalian(){
 
-let bayar = Number(uangBayar.value) || 0
-let total = Number(cartTotal.innerText) || 0
+let bayar=Number(uangBayar.value)||0
+let total=Number(cartTotal.innerText)||0
 
-let kembali = bayar-total
+let kembali=bayar-total
 
-kembalian.innerText = kembali>0 ? kembali : 0
+kembalian.innerText=kembali>0?kembali:0
 
 }
 
-// ==========================
-// HOTKEY
-// ==========================
-
-document.addEventListener("keydown",e=>{
-
-if(e.key=="F2") addCart()
-
-if(e.key=="F4") bayar()
-
-})
 
 // ==========================
-// AUTO FOCUS KASIR
+// AUTO FOCUS
 // ==========================
 
 setInterval(()=>{
@@ -651,6 +702,7 @@ setInterval(()=>{
 kasir_barcode?.focus()
 
 },2000)
+
 
 // ==========================
 // AUTO BACKUP
@@ -664,6 +716,7 @@ localStorage.setItem("backup",JSON.stringify(backup))
 
 },60000)
 
+
 // ==========================
 // INIT
 // ==========================
@@ -672,3 +725,4 @@ renderInventory()
 renderDashboard()
 renderLaporan()
 renderHutang()
+showPage("dashboard")
