@@ -3,9 +3,11 @@
 // ==========================
 
 let inventory = JSON.parse(localStorage.getItem("inventory") || "[]")
-let cart = []
 let laporan = JSON.parse(localStorage.getItem("laporan") || "[]")
 let hutang = JSON.parse(localStorage.getItem("hutang") || "[]")
+let sales = JSON.parse(localStorage.getItem("sales") || "[]")
+
+let cart = []
 
 // ==========================
 // NAVIGATION
@@ -35,8 +37,9 @@ now.toLocaleDateString()+" "+now.toLocaleTimeString()
 
 },1000)
 
+
 // ==========================
-// SAVE INVENTORY
+// INVENTORY
 // ==========================
 
 function saveBarang(){
@@ -79,13 +82,17 @@ resetInventoryForm()
 
 }
 
+// ==========================
+// RENDER INVENTORY
+// ==========================
+
 function renderInventory(){
 
 let html=""
 
 inventory.forEach((b,i)=>{
 
-let jumlahBarcode = b.barcodes.length
+let jumlahBarcode = b.barcodes ? b.barcodes.length : 0
 
 html+=`
 
@@ -131,15 +138,21 @@ checkMinStock()
 
 renderInventory()
 
+// ==========================
+// SEARCH PRODUCT
+// ==========================
+
 function cariBarang(keyword){
 
 keyword = keyword.toLowerCase().trim()
 
 return inventory.find(b =>
 
-(b.barcodes && b.barcodes.some(code => 
+(b.barcodes && b.barcodes.some(code =>
 String(code).toLowerCase() === keyword
-)) ||
+))
+
+||
 
 b.nama.toLowerCase().includes(keyword)
 
@@ -147,13 +160,17 @@ b.nama.toLowerCase().includes(keyword)
 
 }
 
+// ==========================
+// ADD CART
+// ==========================
+
 function addCart(){
 
-let barcode = kasir_barcode.value.trim()
+let keyword = kasir_barcode.value.trim()
 
-if(!barcode) return
+if(!keyword) return
 
-let barang = cariBarang(barcode)
+let barang = cariBarang(keyword)
 
 if(!barang){
 
@@ -164,6 +181,13 @@ return
 }
 
 let qty = Number(kasir_qty.value) || 1
+
+if(barang.stok < qty){
+
+alert("⚠️ Stok tidak cukup")
+return
+
+}
 
 let existing = cart.find(c=>c.id === barang.id)
 
@@ -176,26 +200,16 @@ existing.qty += qty
 cart.push({
 
 id: barang.id,
-
 nama: barang.nama,
-
 kategori: barang.kategori,
-
 satuan: barang.satuan,
 
 modal: barang.modal,
-
 jual: barang.jual,
 
 qty: qty
 
 })
-
-}
-
-if(barang.stok <= 0){
-
-alert("⚠️ Stok barang habis")
 
 }
 
@@ -206,17 +220,20 @@ infoBarang.innerHTML =
 "Stok : "+barang.stok
 
 kasir_barcode.value=""
+kasir_qty.value=1
 
 renderCart()
 
 }
 
+// ==========================
+// CART
+// ==========================
+
 function renderCart(){
 
 let html=""
 let total=0
-
-let last = cart.length-1
 
 cart.forEach((c,i)=>{
 
@@ -226,13 +243,9 @@ total+=sub
 
 html+=`
 
-<tr style="${i==last?'background:#e8f5e9':''}">
+<tr>
 
-<td onclick="showBarcode(${i})" style="cursor:pointer;color:blue">
-
-${c.nama}
-
-</td>
+<td>${c.nama}</td>
 
 <td>${c.jual}</td>
 
@@ -266,11 +279,58 @@ cartTotal.innerText=total
 
 }
 
+function plusQty(i){
+
+cart[i].qty++
+renderCart()
+
+}
+
+function minusQty(i){
+
+cart[i].qty--
+
+if(cart[i].qty<=0){
+
+cart.splice(i,1)
+
+}
+
+renderCart()
+
+}
+
+function hapusCart(i){
+
+cart.splice(i,1)
+
+renderCart()
+
+}
+
+// ==========================
+// PAYMENT
+// ==========================
+
 function bayar(){
+
+if(cart.length==0){
+
+alert("Cart kosong")
+
+return
+
+}
 
 let now = new Date()
 
+let total=0
+
 cart.forEach(c=>{
+
+let sub = c.qty*c.jual
+
+total+=sub
 
 laporan.push({
 
@@ -280,17 +340,16 @@ jam: now.toLocaleTimeString(),
 id: c.id,
 nama: c.nama,
 
-satuan: c.satuan,
 qty: c.qty,
 
 modal: c.modal,
 jual: c.jual,
 
-total: c.jual * c.qty
+total: sub
 
 })
 
-let barang = inventory.find(b => b.id === c.id)
+let barang = inventory.find(b=>b.id===c.id)
 
 if(barang){
 
@@ -300,16 +359,43 @@ barang.stok -= c.qty
 
 })
 
+sales.push({
+
+tanggal: now.toISOString(),
+
+items: cart,
+
+total: total
+
+})
+
 localStorage.setItem("laporan", JSON.stringify(laporan))
 localStorage.setItem("inventory", JSON.stringify(inventory))
+localStorage.setItem("sales", JSON.stringify(sales))
 
 renderInventory()
-renderLaporan()
 renderDashboard()
+renderLaporan()
 
 resetCart()
 
 }
+
+// ==========================
+// RESET CART
+// ==========================
+
+function resetCart(){
+
+cart=[]
+
+renderCart()
+
+}
+
+// ==========================
+// DASHBOARD
+// ==========================
 
 function renderDashboard(){
 
@@ -319,163 +405,15 @@ let totalSales = sales.reduce((t,s)=>t+s.total,0)
 
 omzet.innerText = totalSales
 
-let lowStock = inventory.filter(i=>i.stok<=i.minStock)
+let lowStock = inventory.filter(i=>i.stok<=i.minstok)
 
 stokMenipis.innerText = lowStock.length
 
 }
-let scanner
 
-function scanKasir(){
-
-if(scanner){
-
-scanner.stop()
-
-}
-
-scanner = new Html5Qrcode("reader")
-
-scanner.start(
-{ facingMode:"environment" },
-{
-fps:10,
-qrbox:250
-},
-barcode => {
-
-kasir_barcode.value = barcode
-
-addCart()
-
-}
-)
-
-}
-
-setInterval(()=>{
-
-let backup={
-
-inventory:inventory,
-laporan:laporan,
-hutang:hutang
-
-}
-
-localStorage.setItem("backup",JSON.stringify(backup))
-
-},60000)
-
-document.addEventListener("keydown",e=>{
-
-if(e.key=="F2"){
-addCart()
-}
-
-if(e.key=="F4"){
-bayar()
-let transaksi = {
-
-tanggal: new Date().toISOString(),
-
-items: cart,
-
-total: totalBelanja
-
-}
-
-sales.push(transaksi)
-
-localStorage.setItem("sales",JSON.stringify(sales))
-}
-
-})
-
-function tambahKasir(){
-
-let keyword = kasir_barcode.value
-
-let barang = cariBarang(keyword)
-
-if(!barang){
-
-alert("Barang tidak ditemukan")
-
-return
-
-}
-
-let existing = cart.find(c=>c.id===barang.id)
-
-if(existing){
-
-existing.qty++
-
-}else{
-
-cart.push({
-
-id: barang.id,
-
-nama: barang.nama,
-
-kategori: barang.kategori,
-
-harga: barang.jual,
-
-qty: 1
-
-})
-
-}
-
-kasir_barcode.value=""
-
-renderCart()
-
-}
-
-html += `
-
-<tr>
-
-<td>${c.nama}</td>
-<td>${c.kategori}</td>
-<td>${c.harga}</td>
-<td>${c.qty}</td>
-<td>${c.harga*c.qty}</td>
-
-</tr>
-
-`
-
-}
-
-function resetKasir(){
-
-kasir_barcode.value=""
-kasir_nama.value=""
-kasir_kategori.value=""
-kasir_qty.value=1
-
-kasir_barcode.focus()
-
-}
-
-function checkMinStock(){
-
-inventory.forEach(item=>{
-
-if(item.stok <= (item.minStock || 0)){
-
-console.warn("Stok minimum tercapai:", item.nama)
-
-}
-
-})
-
-}
+// ==========================
+// LAPORAN
+// ==========================
 
 function renderLaporan(){
 
@@ -503,4 +441,94 @@ laporanTable.innerHTML=html
 
 }
 
+// ==========================
+// BARCODE SCANNER
+// ==========================
 
+let scanner
+
+function scanKasir(){
+
+if(scanner){
+
+scanner.stop()
+
+}
+
+scanner = new Html5Qrcode("reader")
+
+scanner.start(
+{ facingMode:"environment" },
+{
+fps:10,
+qrbox:250
+},
+barcode => {
+
+kasir_barcode.value = barcode
+
+addCart()
+
+scanner.stop()
+
+}
+)
+
+}
+
+// ==========================
+// HOTKEY
+// ==========================
+
+document.addEventListener("keydown",e=>{
+
+if(e.key=="F2"){
+
+addCart()
+
+}
+
+if(e.key=="F4"){
+
+bayar()
+
+}
+
+})
+
+// ==========================
+// AUTO BACKUP
+// ==========================
+
+setInterval(()=>{
+
+let backup={
+
+inventory,
+laporan,
+hutang,
+sales
+
+}
+
+localStorage.setItem("backup",JSON.stringify(backup))
+
+},60000)
+
+// ==========================
+// LOW STOCK CHECK
+// ==========================
+
+function checkMinStock(){
+
+inventory.forEach(item=>{
+
+if(item.stok <= (item.minstok || 0)){
+
+console.warn("Stok minimum:", item.nama)
+
+}
+
+})
+
+}
