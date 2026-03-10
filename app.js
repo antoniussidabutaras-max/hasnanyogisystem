@@ -125,11 +125,26 @@ checkMinStock()
 
 renderInventory()
 
-function cariBarang(barcode){
+function cariBarangKasir(){
 
-return inventory.find(b =>
-b.barcodes && b.barcodes.includes(barcode)
+let keyword = kasir_barcode.value.trim().toLowerCase()
+
+let barang = inventory.find(b =>
+
+b.barcode == keyword ||
+b.nama.toLowerCase().includes(keyword) ||
+(b.barcodes && b.barcodes.includes(keyword))
+
 )
+
+if(barang){
+
+kasir_nama.value = barang.nama
+kasir_kategori.value = barang.kategori || "Umum"
+
+kasir_nama.dataset.harga = barang.jual
+
+}
 
 }
 
@@ -377,34 +392,41 @@ bayar()
 
 function tambahKasir(){
 
-let barcode = kasir_barcode.value.trim()
+let nama = kasir_nama.value
+let kategori = kasir_kategori.value
+let harga = Number(kasir_nama.dataset.harga)
 let qty = Number(kasir_qty.value) || 1
 
-let barang = cariBarang(barcode)
+if(!nama){
 
-let nama
-let harga
-let kategori
-
-if(barang){
-
-nama = barang.nama
-harga = barang.jual
-kategori = barang.kategori || "Umum"
-
-}else{
-
-nama = kasir_nama_manual.value
-harga = Number(kasir_harga_manual.value)
-kategori = "Manual"
-
-if(!nama || !harga){
-
-alert("Barang tidak ada di inventory.\nIsi nama dan harga manual.")
+alert("Barang belum dipilih")
 
 return
 
 }
+
+let existing = cart.find(c=>c.nama===nama)
+
+if(existing){
+
+existing.qty += qty
+
+}else{
+
+cart.push({
+
+nama:nama,
+kategori:kategori,
+harga:harga,
+qty:qty
+
+})
+
+}
+
+resetKasir()
+
+renderCart()
 
 }
 
@@ -440,7 +462,7 @@ html += `
 <td>${c.kategori}</td>
 <td>${c.harga}</td>
 <td>${c.qty}</td>
-<td>${c.harga * c.qty}</td>
+<td>${c.harga*c.qty}</td>
 
 </tr>
 
@@ -448,12 +470,12 @@ html += `
 
 }
 
-function resetKasirInput(){
+function resetKasir(){
 
 kasir_barcode.value=""
+kasir_nama.value=""
+kasir_kategori.value=""
 kasir_qty.value=1
-kasir_nama_manual.value=""
-kasir_harga_manual.value=""
 
 kasir_barcode.focus()
 
@@ -472,3 +494,5 @@ console.warn("Stok minimum tercapai:", item.nama)
 })
 
 }
+
+
