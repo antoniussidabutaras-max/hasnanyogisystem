@@ -49,43 +49,27 @@ if(inv_barcode3.value) barcodes.push(inv_barcode3.value)
 
 let barang={
 
-nama:inv_nama.value,
-kategori:inv_kategori.value,
-satuan:inv_satuan.value,
-
-modal:Number(inv_modal.value),
-jual:Number(inv_jual.value),
-
-stok:Number(inv_stok.value),
-minstok:Number(inv_minstok.value),
-
-barcodes:barcodes
-
-}
-
-let item = {
-
 id: Date.now(),
 
-nama: namaBarang.value,
+nama: inv_nama.value,
 
-kategori: kategoriBarang.value || "Umum",
+kategori: inv_kategori.value || "Umum",
 
-modal: Number(hargaModal.value) || 0,
+satuan: inv_satuan.value || "pcs",
 
-jual: Number(hargaJual.value),
+modal: Number(inv_modal.value) || 0,
 
-stok: Number(stokBarang.value) || 0,
+jual: Number(inv_jual.value) || 0,
 
-minStock: Number(minStock.value) || 0,
+stok: Number(inv_stok.value) || 0,
 
-barcode: barcodeBarang.value,
+minstok: Number(inv_minstok.value) || 0,
 
-barcodes: multiBarcodeArray || []
+barcodes: barcodes
 
 }
 
-inventory.push(item)
+inventory.push(barang)
 
 localStorage.setItem("inventory",JSON.stringify(inventory))
 
@@ -149,13 +133,13 @@ renderInventory()
 
 function cariBarang(keyword){
 
-keyword = keyword.toLowerCase()
+keyword = keyword.toLowerCase().trim()
 
 return inventory.find(b =>
 
-b.barcode == keyword ||
-
-(b.barcodes && b.barcodes.includes(keyword)) ||
+(b.barcodes && b.barcodes.some(code => 
+String(code).toLowerCase() === keyword
+)) ||
 
 b.nama.toLowerCase().includes(keyword)
 
@@ -165,7 +149,7 @@ b.nama.toLowerCase().includes(keyword)
 
 function addCart(){
 
-let barcode = kasir_barcode.value
+let barcode = kasir_barcode.value.trim()
 
 if(!barcode) return
 
@@ -181,7 +165,7 @@ return
 
 let qty = Number(kasir_qty.value) || 1
 
-let existing = cart.find(c=>c.barcode==barcode)
+let existing = cart.find(c=>c.id === barang.id)
 
 if(existing){
 
@@ -191,21 +175,25 @@ existing.qty += qty
 
 cart.push({
 
-barcode:barcode,
-nama:barang.nama,
-satuan:barang.satuan,
+id: barang.id,
 
-modal:barang.modal,
-jual:barang.jual,
+nama: barang.nama,
 
-qty:qty,
-barcodes:barang.barcodes
+kategori: barang.kategori,
+
+satuan: barang.satuan,
+
+modal: barang.modal,
+
+jual: barang.jual,
+
+qty: qty
 
 })
 
 }
 
-if(barang.stok<=0){
+if(barang.stok <= 0){
 
 alert("⚠️ Stok barang habis")
 
@@ -280,29 +268,29 @@ cartTotal.innerText=total
 
 function bayar(){
 
-let now=new Date()
+let now = new Date()
 
 cart.forEach(c=>{
 
 laporan.push({
 
-tanggal:now.toLocaleDateString(),
-jam:now.toLocaleTimeString(),
+tanggal: now.toLocaleDateString(),
+jam: now.toLocaleTimeString(),
 
-barcode:c.barcode,
-nama:c.nama,
+id: c.id,
+nama: c.nama,
 
-satuan:c.satuan,
-qty:c.qty,
+satuan: c.satuan,
+qty: c.qty,
 
-modal:c.modal,
-jual:c.jual
+modal: c.modal,
+jual: c.jual,
+
+total: c.jual * c.qty
 
 })
 
-let barang = inventory.find(b =>
-b.barcodes.includes(c.barcode)
-)
+let barang = inventory.find(b => b.id === c.id)
 
 if(barang){
 
@@ -312,8 +300,8 @@ barang.stok -= c.qty
 
 })
 
-localStorage.setItem("laporan",JSON.stringify(laporan))
-localStorage.setItem("inventory",JSON.stringify(inventory))
+localStorage.setItem("laporan", JSON.stringify(laporan))
+localStorage.setItem("inventory", JSON.stringify(inventory))
 
 renderInventory()
 renderLaporan()
