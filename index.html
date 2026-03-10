@@ -139,19 +139,40 @@ gap:15px;
 
 <div id="kasir" class="section">
 
-<h2>Kasir</h2>
+<h2>KASIR</h2>
 
 <div class="card">
 
-<input id="kasir_barcode" placeholder="Scan / input barcode">
+<input 
+id="kasir_barcode"
+placeholder="Scan / ketik barcode..."
+style="width:100%;font-size:18px;padding:10px"
+onchange="addCart()"
+autofocus
+>
 
-<input id="kasir_qty" type="number" value="1">
-
-<button onclick="addCart()">Tambah</button>
+<input 
+id="kasir_qty"
+type="number"
+value="1"
+style="width:80px"
+>
 
 <button onclick="scanKasir()">Scan Kamera</button>
 
 </div>
+
+
+<div class="card">
+
+<h3>Info Barang</h3>
+
+<div id="infoBarang">
+Belum ada barang discan
+</div>
+
+</div>
+
 
 <div class="card">
 
@@ -160,11 +181,13 @@ gap:15px;
 <thead>
 
 <tr>
+
 <th>Barang</th>
 <th>Harga</th>
 <th>Qty</th>
 <th>Total</th>
-<th>Aksi</th>
+<th></th>
+
 </tr>
 
 </thead>
@@ -173,17 +196,29 @@ gap:15px;
 
 </table>
 
-<h3>Total : Rp <span id="cartTotal">0</span></h3>
+<h2>Total Belanja : Rp <span id="cartTotal">0</span></h2>
 
-<input id="uangBayar" placeholder="Uang Bayar">
+</div>
 
-<div>Kembalian : <span id="kembalian">0</span></div>
+
+<div class="card">
+
+<h3>Pembayaran</h3>
+
+<input 
+id="uangBayar"
+placeholder="Uang dibayar"
+style="font-size:18px"
+>
+
+<h3>Kembalian : Rp <span id="kembalian">0</span></h3>
 
 <button onclick="bayar()">Bayar</button>
 
-<button onclick="resetCart()">Reset</button>
+<button onclick="resetCart()">Batal</button>
 
 </div>
+
 
 <div id="reader"></div>
 
@@ -306,4 +341,5 @@ autofocus
 
 </body>
 </html>
+
 
