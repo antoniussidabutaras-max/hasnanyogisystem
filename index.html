@@ -137,28 +137,40 @@ gap:15px;
 <!-- KASIR -->
 <!-- ===================== -->
 
-<div id="kasir" class="section">
-
-<h2>KASIR</h2>
-
 <div class="card">
 
-<input 
-id="kasir_barcode"
-placeholder="Scan / ketik barcode..."
-style="width:100%;font-size:18px;padding:10px"
-onchange="addCart()"
-autofocus
->
+<h3>Input Barang</h3>
 
 <input 
-id="kasir_qty"
+id="scanBarcode"
+placeholder="Scan / ketik barcode"
+style="width:100%;padding:10px;font-size:18px"
+onkeydown="if(event.key==='Enter') tambahBarangKasir()"
+>
+
+<input
+id="manualNama"
+placeholder="Nama barang (opsional jika manual)"
+style="width:100%;padding:8px;margin-top:5px"
+>
+
+<input
+id="manualHarga"
+type="number"
+placeholder="Harga (manual)"
+style="width:100%;padding:8px;margin-top:5px"
+>
+
+<input
+id="qtyBarang"
 type="number"
 value="1"
-style="width:80px"
+style="width:100px;margin-top:5px"
 >
 
-<button onclick="scanKasir()">Scan Kamera</button>
+<button onclick="tambahBarangKasir()">
+Tambah ke Keranjang
+</button>
 
 </div>
 
@@ -341,5 +353,6 @@ autofocus
 
 </body>
 </html>
+
 
 
