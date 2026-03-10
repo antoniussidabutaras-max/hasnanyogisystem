@@ -375,3 +375,87 @@ bayar()
 
 })
 
+function tambahBarangKasir(){
+
+let barcode = scanBarcode.value.trim()
+let namaManual = manualNama.value.trim()
+let hargaManual = Number(manualHarga.value)
+let qty = Number(qtyBarang.value) || 1
+
+let barang = cariBarang(barcode)
+
+let nama,harga,kategori
+
+if(barang){
+
+nama = barang.nama
+harga = barang.jual
+kategori = barang.kategori || "Umum"
+
+}else{
+
+if(!namaManual || !hargaManual){
+
+alert("Barang tidak ditemukan di inventory.\nIsi nama dan harga manual.")
+
+return
+
+}
+
+nama = namaManual
+harga = hargaManual
+kategori = "Manual"
+
+}
+
+let existing = cart.find(c=>c.nama==nama)
+
+if(existing){
+
+existing.qty += qty
+
+}else{
+
+cart.push({
+
+barcode:barcode || "-",
+nama:nama,
+harga:harga,
+kategori:kategori,
+qty:qty
+
+})
+
+}
+
+resetInputKasir()
+
+renderCart()
+
+html+=`
+
+<tr>
+
+<td>${c.nama}</td>
+<td>${c.kategori}</td>
+<td>${c.harga}</td>
+<td>${c.qty}</td>
+<td>${c.harga*c.qty}</td>
+
+</tr>
+
+`
+
+}
+
+function resetInputKasir(){
+
+scanBarcode.value=""
+manualNama.value=""
+manualHarga.value=""
+qtyBarang.value=1
+
+scanBarcode.focus()
+
+}
+
