@@ -375,16 +375,16 @@ bayar()
 
 })
 
-function tambahBarangKasir(){
+function tambahKasir(){
 
-let barcode = scanBarcode.value.trim()
-let namaManual = manualNama.value.trim()
-let hargaManual = Number(manualHarga.value)
-let qty = Number(qtyBarang.value) || 1
+let barcode = kasir_barcode.value.trim()
+let qty = Number(kasir_qty.value) || 1
 
 let barang = cariBarang(barcode)
 
-let nama,harga,kategori
+let nama
+let harga
+let kategori
 
 if(barang){
 
@@ -394,21 +394,21 @@ kategori = barang.kategori || "Umum"
 
 }else{
 
-if(!namaManual || !hargaManual){
+nama = kasir_nama_manual.value
+harga = Number(kasir_harga_manual.value)
+kategori = "Manual"
 
-alert("Barang tidak ditemukan di inventory.\nIsi nama dan harga manual.")
+if(!nama || !harga){
+
+alert("Barang tidak ada di inventory.\nIsi nama dan harga manual.")
 
 return
 
 }
 
-nama = namaManual
-harga = hargaManual
-kategori = "Manual"
-
 }
 
-let existing = cart.find(c=>c.nama==nama)
+let existing = cart.find(c=>c.nama===nama)
 
 if(existing){
 
@@ -418,21 +418,21 @@ existing.qty += qty
 
 cart.push({
 
-barcode:barcode || "-",
-nama:nama,
-harga:harga,
-kategori:kategori,
-qty:qty
+barcode: barcode || "-",
+nama: nama,
+harga: harga,
+kategori: kategori,
+qty: qty
 
 })
 
 }
 
-resetInputKasir()
+resetKasirInput()
 
 renderCart()
 
-html+=`
+html += `
 
 <tr>
 
@@ -440,7 +440,7 @@ html+=`
 <td>${c.kategori}</td>
 <td>${c.harga}</td>
 <td>${c.qty}</td>
-<td>${c.harga*c.qty}</td>
+<td>${c.harga * c.qty}</td>
 
 </tr>
 
@@ -448,14 +448,13 @@ html+=`
 
 }
 
-function resetInputKasir(){
+function resetKasirInput(){
 
-scanBarcode.value=""
-manualNama.value=""
-manualHarga.value=""
-qtyBarang.value=1
+kasir_barcode.value=""
+kasir_qty.value=1
+kasir_nama_manual.value=""
+kasir_harga_manual.value=""
 
-scanBarcode.focus()
+kasir_barcode.focus()
 
 }
-
