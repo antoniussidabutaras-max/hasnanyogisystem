@@ -142,33 +142,33 @@ gap:15px;
 <h3>Input Barang</h3>
 
 <input 
-id="scanBarcode"
+id="kasir_barcode"
 placeholder="Scan / ketik barcode"
-style="width:100%;padding:10px;font-size:18px"
-onkeydown="if(event.key==='Enter') tambahBarangKasir()"
+style="width:100%;padding:10px;font-size:16px"
+onkeydown="if(event.key==='Enter'){tambahKasir()}"
 >
 
 <input
-id="manualNama"
-placeholder="Nama barang (opsional jika manual)"
-style="width:100%;padding:8px;margin-top:5px"
->
-
-<input
-id="manualHarga"
-type="number"
-placeholder="Harga (manual)"
-style="width:100%;padding:8px;margin-top:5px"
->
-
-<input
-id="qtyBarang"
+id="kasir_qty"
 type="number"
 value="1"
 style="width:100px;margin-top:5px"
 >
 
-<button onclick="tambahBarangKasir()">
+<input
+id="kasir_nama_manual"
+placeholder="Nama barang manual (jika tidak ada di inventory)"
+style="width:100%;margin-top:5px"
+>
+
+<input
+id="kasir_harga_manual"
+type="number"
+placeholder="Harga manual"
+style="width:100%;margin-top:5px"
+>
+
+<button onclick="tambahKasir()">
 Tambah ke Keranjang
 </button>
 
@@ -353,6 +353,7 @@ autofocus
 
 </body>
 </html>
+
 
 
 
