@@ -137,20 +137,25 @@ function addCart(){
 
 let barcode = kasir_barcode.value
 
+if(!barcode) return
+
 let barang = cariBarang(barcode)
 
 if(!barang){
 
 alert("Barang tidak ditemukan")
+kasir_barcode.value=""
 return
 
 }
 
-let existing = cart.find(c=>c.nama==barang.nama)
+let qty = Number(kasir_qty.value) || 1
+
+let existing = cart.find(c=>c.barcode==barcode)
 
 if(existing){
 
-existing.qty++
+existing.qty += qty
 
 }else{
 
@@ -163,12 +168,26 @@ satuan:barang.satuan,
 modal:barang.modal,
 jual:barang.jual,
 
-qty:1,
+qty:qty,
 barcodes:barang.barcodes
 
 })
 
 }
+
+if(barang.stok<=0){
+
+alert("⚠️ Stok barang habis")
+
+}
+
+infoBarang.innerHTML =
+
+"<b>"+barang.nama+"</b><br>"+
+"Harga : "+barang.jual+"<br>"+
+"Stok : "+barang.stok
+
+kasir_barcode.value=""
 
 renderCart()
 
@@ -179,17 +198,22 @@ function renderCart(){
 let html=""
 let total=0
 
+let last = cart.length-1
+
 cart.forEach((c,i)=>{
 
 let sub=c.qty*c.jual
+
 total+=sub
 
 html+=`
 
-<tr>
+<tr style="${i==last?'background:#e8f5e9':''}">
 
 <td onclick="showBarcode(${i})" style="cursor:pointer;color:blue">
+
 ${c.nama}
+
 </td>
 
 <td>${c.jual}</td>
@@ -219,6 +243,7 @@ ${c.qty}
 })
 
 cartTable.innerHTML=html
+
 cartTotal.innerText=total
 
 }
@@ -337,3 +362,21 @@ hutang:hutang
 localStorage.setItem("backup",JSON.stringify(backup))
 
 },60000)
+
+document.addEventListener("keydown",e=>{
+
+if(e.key=="F2"){
+addCart()
+}
+
+if(e.key=="F4"){
+bayar()
+}
+
+})
+
+setInterval(()=>{
+
+kasir_barcode.focus()
+
+},1000)
